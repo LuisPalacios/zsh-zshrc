@@ -1,0 +1,2 @@
+# LuisPa's .zshrc
+
