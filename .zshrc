@@ -38,7 +38,7 @@ if [[ "$(uname)" == "Darwin" ]]; then whence -p brew &>/dev/null || eval "$(/opt
 # IMPORTANTE:
 # Descargo una librería de apoyo para ejecutar ciertas partes de estes cript en modo asíncrono
 if [[ ! -a ~/.zshrc.async ]]; then
-  curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-async/a66d76f8404bd9e7a26037640e6c892cf5871ff4/async.zsh
+  curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async
 fi
 
 # Detectar si estoy dentro de una sesión VSCODE
