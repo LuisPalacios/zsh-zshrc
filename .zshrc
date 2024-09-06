@@ -1,5 +1,9 @@
 # Fichero .zshrc de LuisPa 2024
-# Utilizado en MacOS (con brew) y Linux (Ubuntu)
+# Utilizado en MacOS (con brew), Linux (Ubuntu), Windows WSL2
+#
+# Referencias:
+# - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
+# - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
 #
 # DEPENDIENCIAS
 #   1) Script .zshrc.async
@@ -44,8 +48,25 @@ if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
     export IS_VSCODE=true
 fi
 
-# Ejecución de `tmux` si está disponible (usando `~/.tmux.conf`)
+# Detectar si estoy dentro de una sesión WSL2
+# De momento todavía no hago nada con esta info.
+export IS_WSL2=false
+# Verificar si wslinfo --wsl-version existe y retorna 0
+if wslinfo --wsl-version > /dev/null 2>&1; then
+  export IS_WSL2=true
+fi
+
+# Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
 #
+# Esto podría haberlo configurado de dos formas. Cuando hago login con mi
+# usuario y arranza zsh. He optado por la opcion (2)
+#
+# 1) REEMPLAZA zsh por tmux - Que zsh arranque pero inmediatamente sea
+#    reemplazada por tmux
+# 2) MANTENER zsh - Que zsh arranque y me quede en él, para arrancar tmux
+#    manualmente cuando yo quiera.
+#
+# OPCION 1) REEMPLAZAR
 # [ -t 1 ]: Comprueba si el file descriptor 1 (stdout) está asociado a un terminal.
 # (( $+commands[tmux] )): Comprueba si el ejecutable tmux está en el PATH
 # [[ -f ~/.tmux.conf ]]: Compruebo si tengo el fichero  de configuración
@@ -82,10 +103,12 @@ fi
 # fi
 # ------- ------- ------- ------- ------- -------
 #
-# Podría haber dejado las líneas anteriores sin comentar que
+# OPCION 2) MANTENER
+# Como decía, podría haber dejado las líneas anteriores sin comentar que
 # provocarían que se ejecute tmux reemplazando la shell actual.
 # He optado por dejarlas comentadas y si necesito tmux lo ejecuto
 # llamando al alias 't' (con exec) o 'tt' (sin exec).
+#
 # Esta opción me da más flexibilidad, puedo elegir cuándo uso
 # tmux, lo cual es muy útil si me conecto a equipos linux remotos
 # que tienen zsh y tmux (y copia de este .zshrc, .tmux.conf, etc)
@@ -285,17 +308,17 @@ function +vi-home-path() {
 }
 function __git_symbols() {
 	# Symbols
-	local ahead='↑'         # '↑' '🔺'
-	local behind='↓'        # '↓' '🔻'
-	local diverged='↕'      # '↕' '♦️' '🆘'
+	local ahead='↑'         # '↑' '�'
+	local behind='↓'        # '↓' '�'
+	local diverged='↕'      # '↕' '♦️' '�'
 	#local up_to_date='|'    # '|' '✅'
 	local no_remote='o'     # 'o' '⭕'
-	local staged='+'        # '+' '📗'
+	local staged='+'        # '+' '�'
 	local untracked='?'     # '?' '❓'
 	local modified='!'      # '!' '❗'
 	local moved='>'          # '>' '➡️'
 	local deleted='x'       # 'x' '❌'
-	local stashed='$'       # '$' '📤'
+	local stashed='$'       # '$' '�'
 
 	local output_symbols=''
 
@@ -421,11 +444,14 @@ function __git_info() {
 }
 
 # Asynchronous VCS status
-source ~/.zshrc.async
-async_init
-_vbe_vcs_async_start
-add-zsh-hook precmd _vbe_vcs_precmd
-add-zsh-hook chpwd _vbe_vcs_chpwd
+if [ "$IS_WSL2" = false ] ; then
+  # Solo si no estoy en WSL2
+  source ~/.zshrc.async
+  async_init
+  _vbe_vcs_async_start
+  add-zsh-hook precmd _vbe_vcs_precmd
+  add-zsh-hook chpwd _vbe_vcs_chpwd
+fi
 
 # Add VCS information to the prompt
 _vbe_add_prompt_0vcs () {
@@ -455,6 +481,107 @@ _vbe_add_prompt_0vcs () {
 # %U: Start underlined text.
 # %u: Stop underlined text.
 #
+
+# Parse de Git mucho mas simplificado que usaré en entorno WSL2 que es más lento
+# simple_parse_git_branch() {
+#   local branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
+#    if [ -n "$branch" ]; then
+#     # Verificar si hay cambios no confirmados
+#     if ! git diff --quiet 2>/dev/null; then
+#       echo " ($branch %F{red}●%f)"  # Cambios no confirmados
+#     else
+#       # Verificar si hay commits para hacer push
+#       if [ $(git rev-list @{u}..HEAD 2>/dev/null | wc -l) -gt 0 ]; then
+#         echo " ($branch %F{red}●%f)"  # Commits por hacer push
+#       else
+#         # Verificar si hay commits para hacer pull
+#         if [ $(git rev-list HEAD..@{u} 2>/dev/null | wc -l) -gt 0 ]; then
+#           echo " ($branch %F{red}●%f)"  # Commits por hacer pull
+#         else
+#           # Si no hay estado especial, agregar un ícono de check
+#           echo " ($branch %F{green}✓%f)"
+#         fi
+#       fi
+#     fi
+#   else
+#     echo ""
+#   fi
+# }
+
+# Declarar y definir variables globales para el estado de git
+export GIT_PROMPT_CACHE=""
+GIT_PROMPT_LAST_UPDATE=0
+LAST_GIT_DIR=""
+
+wsl2_parse_git_branch_cached() {
+  local branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
+  if [ -n "$branch" ]; then
+    # Comprobar si es necesario actualizar el estado de git
+    if [[ -z "$GIT_PROMPT_CACHE" || "$PWD" != "$LAST_GIT_DIR" || $(( $(date +%s) - GIT_PROMPT_LAST_UPDATE )) -ge 5 ]]; then
+      LAST_GIT_DIR="$PWD"
+      GIT_PROMPT_LAST_UPDATE=$(date +%s)
+      # Verificar si hay cambios no confirmados
+      if ! git diff --quiet 2>/dev/null; then
+        GIT_PROMPT_CACHE=" ($branch %F{red}●%f)"  # Cambios no confirmados
+      else
+        # Verificar si hay commits para hacer push
+        if [ $(git rev-list @{u}..HEAD 2>/dev/null | wc -l) -gt 0 ]; then
+          GIT_PROMPT_CACHE=" ($branch %F{red}●%f)"  # Commits por hacer push
+        else
+          # Verificar si hay commits para hacer pull
+          if [ $(git rev-list HEAD..@{u} 2>/dev/null | wc -l) -gt 0 ]; then
+            GIT_PROMPT_CACHE=" ($branch %F{red}●%f)"  # Commits por hacer pull
+          else
+            # Si no hay estado especial, agregar un ícono de check
+            GIT_PROMPT_CACHE=" ($branch %F{green}✓%f)"
+          fi
+        fi
+      fi
+    fi
+  fi
+}
+precmd() {
+  # Actualizar el estado de git en segundo plano
+  wsl2_parse_git_branch_cached
+}
+
+# simple_parse_git_branch() {
+#   # Obtener la rama actual, si existe
+#   local branch
+#   branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
+
+#   # Usar 'git status' para hacer una única llamada en lugar de varias llamadas a git
+#   local git_status
+#   git_status=$(git status --porcelain --branch 2>/dev/null)
+
+#   if [[ $git_status == *"ahead"* ]] || [[ $git_status == *"behind"* ]] || [[ $git_status == *"?? "* ]] || [[ $git_status == *" M "* ]]; then
+#     echo " ($branch %F{red}●%f)"
+#   else
+#     echo " ($branch %F{green}✓%f)"
+#   fi
+# }
+
+# simple_parse_git_branch_cached() {
+#   if [[ -z "$GIT_PROMPT_CACHE" || "$PWD" != "$LAST_GIT_DIR" || $(( $(date +%s) - $GIT_PROMPT_LAST_UPDATE )) -ge 5 ]]; then
+#   echo x
+#     LAST_GIT_DIR="$PWD"
+#     GIT_PROMPT_LAST_UPDATE=$(date +%s)
+
+#     local branch
+#     branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
+
+#     local git_status
+#     git_status=$(git status --porcelain --branch 2>/dev/null)
+
+#     if [[ $git_status == *"ahead"* ]] || [[ $git_status == *"behind"* ]] || [[ $git_status == *"?? "* ]] || [[ $git_status == *" M "* ]]; then
+#       GIT_PROMPT_CACHE=" ($branch %F{red}●%f)"
+#     else
+#       GIT_PROMPT_CACHE=" ($branch %F{green}✓%f)"
+#     fi
+#   fi
+
+#   echo "$GIT_PROMPT_CACHE"
+# }
 
 # Parametrizo según OS
 #
@@ -511,6 +638,10 @@ case "$OSTYPE" in
     # Ruby y Gems
     export PATH="/opt/homebrew/opt/ruby/bin:~/.gems/bin:$PATH"   # Versión para Mac ARM
     #export PATH="/usr/local/opt/ruby/bin:~/.gems/bin:$PATH"     # Versión para Mac Intel
+    # LLVM Clang 17
+    export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/llvm@17/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm@17/include"
 
     # C y C++
     export CPLUS_INCLUDE_PATH=/usr/local/include
@@ -544,8 +675,14 @@ case "$OSTYPE" in
       # En el caso de ser root
       PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
     else
-      # Mi usuario normal
-      PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
+      if [ "$IS_WSL2" = true ] ; then
+
+        # Al estar bajo WSL2 uso un prompt simplificado (mucho más rápido)
+        PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${GIT_PROMPT_CACHE} %# '
+      else
+        # Mi usuario normal con Git info en el prompt muy detallado
+        PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
+      fi
     fi
 
     # PATH
