@@ -3,8 +3,8 @@
 #
 # Referencias:
 # - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
-# - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
 #
+# - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
 # DEPENDIENCIAS
 #   1) Script .zshrc.async
 #      Lo descargo automáticamente desde https://github.com/LuisPalacios/zsh-async
@@ -483,9 +483,9 @@ _vbe_add_prompt_0vcs () {
 #
 
 # Parse de Git mucho mas simplificado que usaré en entorno WSL2 que es más lento
-# simple_parse_git_branch() {
 #   local branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
 #    if [ -n "$branch" ]; then
+# simple_parse_git_branch() {
 #     # Verificar si hay cambios no confirmados
 #     if ! git diff --quiet 2>/dev/null; then
 #       echo " ($branch %F{red}●%f)"  # Cambios no confirmados
@@ -638,14 +638,15 @@ case "$OSTYPE" in
     # Ruby y Gems
     export PATH="/opt/homebrew/opt/ruby/bin:~/.gems/bin:$PATH"   # Versión para Mac ARM
     #export PATH="/usr/local/opt/ruby/bin:~/.gems/bin:$PATH"     # Versión para Mac Intel
-    # LLVM Clang 17
-    export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/llvm@17/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm@17/include"
 
-    # C y C++
-    export CPLUS_INCLUDE_PATH=/usr/local/include
-    export LIBRARY_PATH=/usr/local/lib
+    # Utilizo CLANG 17 y lo he instalado vía Homebrew
+    export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+    export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
+    export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
+    export CC="/opt/homebrew/opt/llvm@17/bin/clang"
+    export CXX="/opt/homebrew/opt/llvm@17/bin/clang++"
+    export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
 
     # ALIAS
     alias grep="/usr/bin/grep -d skip"
@@ -710,5 +711,19 @@ export LC_TELEPHONE="es_ES.UTF-8"
 export LC_MEASUREMENT="es_ES.UTF-8"
 export LC_IDENTIFICATION="es_ES.UTF-8"
 export LC_ALL="es_ES.UTF-8"
+
+# *NEW* Implemento Starship para el prompt
+# ==============================================================================
+if which starship >/dev/null 2>&1; then
+  echo "El ejecutable existe"
+  # Descargo mi fichero de configuración de starship
+  if [[ ! -a ~/.config/starship.toml ]]; then
+    mkdir -p ~/.config
+    curl -LJs -o ~/.config/starship.toml https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/ed28f30823d91a257a6c6fe8b7d52de1aa759c6d/starship.toml
+  fi
+  # Integro startship en mi shell
+  eval "$(starship init zsh)"
+fi
+# ==============================================================================
 
 # LuisPa: -------------------------------------------------------------- END

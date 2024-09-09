@@ -90,6 +90,9 @@ up_to_date = ""
 [cmake]
 disabled = true
 
+[perl]
+disabled = true
+
 # Duración de los comandos
 [cmd_duration]
 disabled = true
