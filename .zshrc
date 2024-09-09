@@ -718,7 +718,7 @@ if which starship >/dev/null 2>&1; then
   echo "El ejecutable existe"
   # Descargo mi fichero de configuración de starship solo si no existe o si es diferente
   LOCAL_FILE=~/.config/starship.toml
-  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/ed28f30823d91a257a6c6fe8b7d52de1aa759c6d/starship.toml"
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/starship.toml"
   TEMP_REMOTE_FILE=/tmp/starship_remote.toml
 
   # Descargar el archivo remoto temporalmente
