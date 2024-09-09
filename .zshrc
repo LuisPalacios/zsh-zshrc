@@ -19,7 +19,7 @@
 #   MacOS normal user - OK
 #   MacOS root - usa una versión especial de bash que consume /root.lprofile
 #
-# Activar para debu
+# Activar para debug
 #set -x
 
 # In bash escape-delete deletes a single word. However in ZSH a variable defines which
@@ -726,11 +726,11 @@ if which starship >/dev/null 2>&1; then
 
   # Comprobar si el archivo local no existe o si es diferente del remoto
   if [[ ! -a $LOCAL_FILE ]] || ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-    echo "El fichero local no existe o es diferente. Actualizando..."
+    #echo "El fichero local no existe o es diferente. Actualizando..."
     mkdir -p ~/.config
     mv $TEMP_REMOTE_FILE $LOCAL_FILE
   else
-    echo "El fichero local está actualizado."
+    #echo "El fichero local está actualizado."
     rm $TEMP_REMOTE_FILE
   fi
 
