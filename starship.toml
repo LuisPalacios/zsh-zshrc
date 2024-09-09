@@ -1,0 +1,109 @@
+# Starship prompt configuration
+# Autor: LuisPa
+# Fecha: 2024-09-09
+#
+# Copiar a ~/.config/starship.toml
+#
+# FAQ:
+#   https://starship.rs/faq/
+#
+# Orden de los módulos (cómmo se muestran en el prompt):
+#   https://starship.rs/config/#default-prompt-format
+#
+# Comandos de ayuda:
+#   starship explain
+#
+
+# Cambio el orden de los modulos que salen en el prompt
+format = '$os$all'
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Configuración global del prompt
+add_newline = false  # Agrega una nueva línea antes del prompt
+
+# Nodo de información sobre el sistema operativo
+[os]
+disabled = false
+
+# Nodo de información sobre el usuario
+[username]
+format = "[$user]($style)@"
+style_user = 'white bold'
+style_root = 'black bold'
+disabled = false
+show_always = true
+
+# Nodo de información sobre el host
+[hostname]
+ssh_only = false
+format = "[$hostname]($style):"
+style = "bold dimmed"
+trim_at = '.companyname.com'
+disabled = false
+
+# Directorio actual
+[directory]
+truncation_length = 3  # Limita a mostrar los últimos 3 directorios
+truncate_to_repo = true  # Trunca al directorio raíz del repo git si es necesario
+format = "[$path]($style) "
+style = "cyan bold"
+
+# Orden módulos git
+# git_branch
+# git_commit
+# git_state
+# git_metrics
+# git_status
+
+# Muestro la branch de git
+[git_branch]
+disabled = false
+format = "(\\([$symbol$branch(:$remote_branch)]($style))"
+style = "bold purple"
+
+# Muestro el hash del commit
+[git_commit]
+commit_hash_length = 4
+tag_symbol = '� '
+
+# Indicador de estado Git
+[git_status]
+ahead = "⇡${count}"
+behind = "⇣${count}"
+conflicted = "[=](bold red)"
+deleted = "[✘](bold red)"
+disabled = false
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+format = "( [$all_status$ahead_behind]($style))\\) "
+ignore_submodules = true
+modified = "[!](bold yellow)"
+renamed = "[»](bold purple)"
+staged = "[+](bold green)"
+stashed = "[\\$](bold blue)"
+style = "bold green"
+untracked = "[?](bold red)"
+up_to_date = ""
+
+# Deshabilito lenguajes
+[cmake]
+disabled = true
+
+# Duración de los comandos
+[cmd_duration]
+disabled = true
+min_time = 2000  # Tiempo mínimo en milisegundos para mostrar la duración (2 segundos)
+format = "[ $duration]($style) "
+style = "bold yellow"
+show_milliseconds = true
+
+# No quiero añadir un line break previo al prompt
+[line_break]
+disabled = true
+
+# Caracter que aparece al final del prompt
+[character]
+success_symbol = "[❯](bold green)"  # Símbolo de éxito
+error_symbol = "[❯](bold red)"  # Símbolo de error
+
