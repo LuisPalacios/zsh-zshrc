@@ -737,30 +737,30 @@ if which starship >/dev/null 2>&1; then
 
   # Comprobar si el archivo local no existe
   if [[ ! -a $LOCAL_FILE ]]; then
-    echo "El fichero local no existe. Descargando..."
+    #echo "El fichero local no existe. Descargando..."
     mkdir -p ~/.config
     curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
     touch $LOCAL_FILE
   else
     # Verificar si se ha descargado en el último día
     if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
-      echo "Más de un día desde la última verificación. Comprobando cambios..."
+      #echo "Más de un día desde la última verificación. Comprobando cambios..."
       # Descargar el archivo remoto temporalmente
       curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
 
       # Comprobar si el archivo local es diferente del remoto
       if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-        echo "El fichero local es diferente. Actualizando..."
+        #echo "El fichero local es diferente. Actualizando..."
         mv $TEMP_REMOTE_FILE $LOCAL_FILE
       else
-        echo "El fichero local está actualizado."
+        #echo "El fichero local está actualizado."
         rm $TEMP_REMOTE_FILE
       fi
 
       # Actualizar la marca de tiempo del archivo de verificación
       touch $LOCAL_FILE
-    else
-      echo "La comprobación se hizo en la último día. No es necesario descargar."
+    #else
+      #echo "La comprobación se hizo en la último día. No es necesario descargar."
     fi
   fi
 
