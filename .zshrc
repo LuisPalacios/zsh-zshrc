@@ -712,29 +712,61 @@ export LC_MEASUREMENT="es_ES.UTF-8"
 export LC_IDENTIFICATION="es_ES.UTF-8"
 export LC_ALL="es_ES.UTF-8"
 
+
+
 # *NEW* Implemento Starship para el prompt
 # ==============================================================================
 if which starship >/dev/null 2>&1; then
   echo "El ejecutable existe"
-  # Descargo mi fichero de configuración de starship solo si no existe o si es diferente
+  # Variables
   LOCAL_FILE=~/.config/starship.toml
   REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/starship.toml"
   TEMP_REMOTE_FILE=/tmp/starship_remote.toml
 
-  # Descargar el archivo remoto temporalmente
-  curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+  # Detectar el sistema operativo para usar el comando 'date' correcto
+  case "$OSTYPE" in
+    # MacOS
+    (darwin|freebsd)*)
+      ONE_DAY_AGO=$(date -v -1d +%s)
+      ;;
+    # Linux
+    *)
+      ONE_DAY_AGO=$(date -d '1 day ago' +%s)
+      ;;
+  esac
 
-  # Comprobar si el archivo local no existe o si es diferente del remoto
-  if [[ ! -a $LOCAL_FILE ]] || ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-    #echo "El fichero local no existe o es diferente. Actualizando..."
+  # Comprobar si el archivo local no existe
+  if [[ ! -a $LOCAL_FILE ]]; then
+    echo "El fichero local no existe. Descargando..."
     mkdir -p ~/.config
-    mv $TEMP_REMOTE_FILE $LOCAL_FILE
+    curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
+    touch $LOCAL_FILE
   else
-    #echo "El fichero local está actualizado."
-    rm $TEMP_REMOTE_FILE
+    # Verificar si se ha descargado en el último día
+    if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
+      echo "Más de un día desde la última verificación. Comprobando cambios..."
+      # Descargar el archivo remoto temporalmente
+      curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+
+      # Comprobar si el archivo local es diferente del remoto
+      if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
+        echo "El fichero local es diferente. Actualizando..."
+        mv $TEMP_REMOTE_FILE $LOCAL_FILE
+      else
+        echo "El fichero local está actualizado."
+        rm $TEMP_REMOTE_FILE
+      fi
+
+      # Actualizar la marca de tiempo del archivo de verificación
+      touch $LOCAL_FILE
+    else
+      echo "La comprobación se hizo en la último día. No es necesario descargar."
+    fi
   fi
 
   # Integro startship en mi shell
   eval "$(starship init zsh)"
 fi
+# ==============================================================================
+
 # LuisPa: -------------------------------------------------------------- END
