@@ -717,7 +717,7 @@ export LC_ALL="es_ES.UTF-8"
 # *NEW* Implemento Starship para el prompt
 # ==============================================================================
 if which starship >/dev/null 2>&1; then
-  echo "El ejecutable existe"
+  #echo "El ejecutable existe"
   # Variables
   LOCAL_FILE=~/.config/starship.toml
   REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/starship.toml"
