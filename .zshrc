@@ -716,14 +716,25 @@ export LC_ALL="es_ES.UTF-8"
 # ==============================================================================
 if which starship >/dev/null 2>&1; then
   echo "El ejecutable existe"
-  # Descargo mi fichero de configuración de starship
-  if [[ ! -a ~/.config/starship.toml ]]; then
+  # Descargo mi fichero de configuración de starship solo si no existe o si es diferente
+  LOCAL_FILE=~/.config/starship.toml
+  REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/ed28f30823d91a257a6c6fe8b7d52de1aa759c6d/starship.toml"
+  TEMP_REMOTE_FILE=/tmp/starship_remote.toml
+
+  # Descargar el archivo remoto temporalmente
+  curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+
+  # Comprobar si el archivo local no existe o si es diferente del remoto
+  if [[ ! -a $LOCAL_FILE ]] || ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
+    echo "El fichero local no existe o es diferente. Actualizando..."
     mkdir -p ~/.config
-    curl -LJs -o ~/.config/starship.toml https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/ed28f30823d91a257a6c6fe8b7d52de1aa759c6d/starship.toml
+    mv $TEMP_REMOTE_FILE $LOCAL_FILE
+  else
+    echo "El fichero local está actualizado."
+    rm $TEMP_REMOTE_FILE
   fi
+
   # Integro startship en mi shell
   eval "$(starship init zsh)"
 fi
-# ==============================================================================
-
 # LuisPa: -------------------------------------------------------------- END
