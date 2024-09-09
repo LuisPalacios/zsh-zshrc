@@ -51,6 +51,7 @@ format = "[$path]($style) "
 style = "cyan bold"
 
 # Orden módulos git
+# Pendiente de estudio: https://github.com/AOSC-Dev/aoscify-starship-theme/tree/master
 # git_branch
 # git_commit
 # git_state
