@@ -238,6 +238,9 @@ disabled = true
 [spack]
 disabled = true
 
+[gcloud]
+disabled = true
+
 # Duración de los comandos
 [cmd_duration]
 disabled = true
