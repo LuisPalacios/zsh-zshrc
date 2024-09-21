@@ -87,6 +87,9 @@ style = "bold green"
 untracked = "[?](bold red)"
 up_to_date = ""
 
+[docker_context]
+disabled = true
+
 # Deshabilito lenguajes de programación
 [c]
 disabled = true
