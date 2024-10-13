@@ -5,6 +5,7 @@
 # - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
 #
 # - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
+#
 # DEPENDIENCIAS
 #   1) Script .zshrc.async
 #      Lo descargo automáticamente desde https://github.com/LuisPalacios/zsh-async
@@ -19,6 +20,12 @@
 #   MacOS normal user - OK
 #   MacOS root - usa una versión especial de bash que consume /root.lprofile
 #
+# Instalar con:
+#
+# curl -LJs -o ~/.zshrc https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc
+#
+
+
 # Activar para debug
 #set -x
 
@@ -308,17 +315,17 @@ function +vi-home-path() {
 }
 function __git_symbols() {
 	# Symbols
-	local ahead='↑'         # '↑' '�'
-	local behind='↓'        # '↓' '�'
-	local diverged='↕'      # '↕' '♦️' '�'
+	local ahead='↑'         # '↑' '🔺'
+	local behind='↓'        # '↓' '🔻'
+	local diverged='↕'      # '↕' '♦️' '🆘'
 	#local up_to_date='|'    # '|' '✅'
 	local no_remote='o'     # 'o' '⭕'
-	local staged='+'        # '+' '�'
+	local staged='+'        # '+' '📗'
 	local untracked='?'     # '?' '❓'
 	local modified='!'      # '!' '❗'
 	local moved='>'          # '>' '➡️'
 	local deleted='x'       # 'x' '❌'
-	local stashed='$'       # '$' '�'
+	local stashed='$'       # '$' '📤'
 
 	local output_symbols=''
 
@@ -661,6 +668,9 @@ case "$OSTYPE" in
     # De esta forma consigo el prompt inmediatamente.
     (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
 
+    # Path para shfmt
+    export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+
     ;;
   # Linux
   *)
@@ -677,17 +687,50 @@ case "$OSTYPE" in
       PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
     else
       if [ "$IS_WSL2" = true ] ; then
+        # PATH para WSL2
+        export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
+        PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
+        PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
+        PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
+        PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
+        PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
+        PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
+        PATH=$PATH:"/usr/local/go/bin"
 
+        # No puedo cambiar el HOME porque rompe la integracion con Docker.
+        # Cambio el comando "cd"
+        #cd() {
+        #  if [ -z "$1" ]; then
+        #    builtin cd /mnt/c/Users/${USER}
+        #  else
+        #    builtin cd "$@"
+        #  fi
+        #}
+        #cd
+        alias c="cd /mnt/c/Users/luis"
+        alias git="git.exe"
+
+        # Selecciono el contexto adecuado con docker (si está instalado)
+        #docker context use default &>/dev/null # 2>/dev/null
+
+        # DEPRECATED: Uso Startship, no necesito poner el prompt aquí
         # Al estar bajo WSL2 uso un prompt simplificado (mucho más rápido)
-        PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${GIT_PROMPT_CACHE} %# '
+        # PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${GIT_PROMPT_CACHE} %# '
       else
+
+        # PATH para Linux
+        export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
+
         # Mi usuario normal con Git info en el prompt muy detallado
         PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
+
+        # Path para shfmt
+        export SHFMT_PATH="/usr/bin/shfmt"
+
+        # Me aseguro de que el agente SSH esté en ejecución
+        eval "$(ssh-agent)" &>/dev/null
       fi
     fi
-
-    # PATH
-    export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
 
     ;;
 esac
