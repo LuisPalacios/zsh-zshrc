@@ -12,6 +12,8 @@
 #      se trata de un FORK del proyecto https://github.com/mafredri/zsh-async
 #      Se trata de una librería de apoyo para ejecutar código en modo asíncrono
 #
+
+#
 # Creditos:
 #   1) Ideas y más en "My .zshrc" -> https://github.com/vincentbernat/zshrc
 #
@@ -668,8 +670,13 @@ case "$OSTYPE" in
     # De esta forma consigo el prompt inmediatamente.
     (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
 
-    # Path para shfmt
-    export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+    # Uso la extensión foxundermoon.shell-format en VSCode que a su vez
+    # utiliza "shfmt" para formatear los scripts de shell. Añado el PATH a shfmt
+    # si está instalado.
+    #   Para instalarlo: https://github.com/mvdan/sh#shfmt
+    if [ -x /opt/homebrew/bin/shfmt ]; then
+      export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+    fi
 
     ;;
   # Linux
@@ -724,8 +731,13 @@ case "$OSTYPE" in
         # Mi usuario normal con Git info en el prompt muy detallado
         PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
 
-        # Path para shfmt
-        export SHFMT_PATH="/usr/bin/shfmt"
+        # Uso la extensión foxundermoon.shell-format en VSCode que a su vez
+        # utiliza "shfmt" para formatear los scripts de shell. Añado el PATH a shfmt
+        # si está instalado.
+        #   Para instalarlo: https://github.com/mvdan/sh#shfmt
+        if [ -x /usr/bin/shfmt ]; then
+          export SHFMT_PATH="/usr/bin/shfmt"
+        fi
 
         # Me aseguro de que el agente SSH esté en ejecución
         eval "$(ssh-agent)" &>/dev/null
