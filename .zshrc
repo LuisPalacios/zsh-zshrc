@@ -27,7 +27,6 @@
 # curl -LJs -o ~/.zshrc https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc
 #
 
-
 # Activar para debug
 #set -x
 
