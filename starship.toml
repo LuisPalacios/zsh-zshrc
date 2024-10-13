@@ -31,7 +31,7 @@ disabled = false
 [username]
 format = "[$user]($style)@"
 style_user = 'white bold'
-style_root = 'black bold'
+style_root = 'red bold'
 disabled = false
 show_always = true
 

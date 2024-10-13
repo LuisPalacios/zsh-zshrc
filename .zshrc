@@ -690,7 +690,7 @@ case "$OSTYPE" in
     # Mi PROMPT
     if [[ $EUID -eq 0 ]]; then
       # En el caso de ser root
-      PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
+      PROMPT='[%B%F{red}root%f%b]@%m:%~%# '
     else
       if [ "$IS_WSL2" = true ] ; then
         # PATH para WSL2
