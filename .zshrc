@@ -1,4 +1,4 @@
-# Fichero .zshrc de LuisPa 2024
+# Fichero .zshrc de LuisPa 2025
 # Utilizado en MacOS (con brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
