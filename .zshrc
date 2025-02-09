@@ -30,151 +30,44 @@ if wslinfo --wsl-version > /dev/null 2>&1; then
   export IS_WSL2=true
 fi
 
+# Detectar si estoy dentro de una sesión VSCODE
+# De momento todavía no hago nada con esta info.
+export IS_VSCODE=false
+if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
+    export IS_VSCODE=true
+fi
+
 # Si WSL2, version simple y salgo
 if [ "$IS_WSL2" = true ] ; then
 
-  # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-  # Initialization code that may require console input (password prompts, [y/n]
-  # confirmations, etc.) must go above this block; everything else may go below.
-  if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-  fi
-
-  ###
-  ### Necesita tener instalado Oh-My-Zsh
-  ###
-  ### # Entrar en WSL, abrir la shell normal
-  ### sh
-  ### # instalar oh-my-zsh
-  ### sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  ###
-
   # Path para WSL
   export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
-  PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
-  PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
-  PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
-  PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
-  PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
-  PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
-  PATH=$PATH:"/usr/local/go/bin"
+  export PATH=$PATH:"/home/luis/bin"
+  export PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
+  export PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
+  export PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
+  export PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
+  export PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
+  export PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
+  export PATH=$PATH:"/usr/local/go/bin"
 
-  # Path to your Oh My Zsh installation.
-  export ZSH="$HOME/.oh-my-zsh"
+  # Personalización de los colores del comando 'ls'
+  export LS_COLORS='fi=00:mi=00:mh=00:ln=01;94:or=01;31:di=01;36:ow=04;01;34:st=34:tw=04;34:'
+  LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
+  LS_COLORS+=':*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32'
+  LS_COLORS+=':*.tar=00;31:*.tbz=00;31:*.tgz=00;31:*.rpm=00;31:*.deb=00;31:*.arj=00;31'
+  LS_COLORS+=':*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.zip=00;31:*.zoo=00;31:*.z=00;31'
+  LS_COLORS+=':*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.tb2=00;31:*.tz2=00;31:*.tbz2=00;31'
+  LS_COLORS+=':*.avi=01;35:*.bmp=01;35:*.fli=01;35:*.gif=01;35:*.jpg=01;35:*.jpeg=01;35'
+  LS_COLORS+=':*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35'
+  LS_COLORS+=':*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35'
+  LS_COLORS+=':*.dl=01;35:*.gl=01;35:*.wmv=01;35'
+  # mientras que LSCOLORS se usa en el ls de BSD
+  export CLICOLOR=1
+  export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
 
-  # Set name of the theme to load --- if set to "random", it will
-  # load a random theme each time Oh My Zsh is loaded, in which case,
-  # to know which specific one was loaded, run: echo $RANDOM_THEME
-  # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-  ZSH_THEME="robbyrussell"
-
-  # Set list of themes to pick from when loading at random
-  # Setting this variable when ZSH_THEME=random will cause zsh to load
-  # a theme from this variable instead of looking in $ZSH/themes/
-  # If set to an empty array, this variable will have no effect.
-  # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-  # Uncomment the following line to use case-sensitive completion.
-  # CASE_SENSITIVE="true"
-
-  # Uncomment the following line to use hyphen-insensitive completion.
-  # Case-sensitive completion must be off. _ and - will be interchangeable.
-  # HYPHEN_INSENSITIVE="true"
-
-  # Uncomment one of the following lines to change the auto-update behavior
-  # zstyle ':omz:update' mode disabled  # disable automatic updates
-  # zstyle ':omz:update' mode auto      # update automatically without asking
-  # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-  # Uncomment the following line to change how often to auto-update (in days).
-  # zstyle ':omz:update' frequency 13
-
-  # Uncomment the following line if pasting URLs and other text is messed up.
-  # DISABLE_MAGIC_FUNCTIONS="true"
-
-  # Uncomment the following line to disable colors in ls.
-  # DISABLE_LS_COLORS="true"
-
-  # Uncomment the following line to disable auto-setting terminal title.
-  # DISABLE_AUTO_TITLE="true"
-
-  # Uncomment the following line to enable command auto-correction.
-  # ENABLE_CORRECTION="true"
-
-  # Uncomment the following line to display red dots whilst waiting for completion.
-  # You can also set it to another string to have that shown instead of the default red dots.
-  # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-  # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-  # COMPLETION_WAITING_DOTS="true"
-
-  # Uncomment the following line if you want to disable marking untracked files
-  # under VCS as dirty. This makes repository status check for large repositories
-  # much, much faster.
-  # DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-  # Uncomment the following line if you want to change the command execution time
-  # stamp shown in the history command output.
-  # You can set one of the optional three formats:
-  # "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-  # or set a custom format using the strftime function format specifications,
-  # see 'man strftime' for details.
-  # HIST_STAMPS="mm/dd/yyyy"
-
-  # Would you like to use another custom folder than $ZSH/custom?
-  # ZSH_CUSTOM=/path/to/new-custom-folder
-
-  # Which plugins would you like to load?
-  # Standard plugins can be found in $ZSH/plugins/
-  # Custom plugins may be added to $ZSH_CUSTOM/plugins/
-  # Example format: plugins=(rails git textmate ruby lighthouse)
-  # Add wisely, as too many plugins slow down shell startup.
-  plugins=(git)
-
-  source $ZSH/oh-my-zsh.sh
-
-  # User configuration
-
-  # export MANPATH="/usr/local/man:$MANPATH"
-
-  # You may need to manually set your language environment
-  # export LANG=en_US.UTF-8
-
-  # Preferred editor for local and remote sessions
-  # if [[ -n $SSH_CONNECTION ]]; then
-  #   export EDITOR='vim'
-  # else
-  #   export EDITOR='nvim'
-  # fi
-
-  # Compilation flags
-  # export ARCHFLAGS="-arch $(uname -m)"
-
-  # Set personal aliases, overriding those provided by Oh My Zsh libs,
-  # plugins, and themes. Aliases can be placed here, though Oh My Zsh
-  # users are encouraged to define aliases within a top-level file in
-  # the $ZSH_CUSTOM folder, with .zsh extension. Examples:
-  # - $ZSH_CUSTOM/aliases.zsh
-  # - $ZSH_CUSTOM/macos.zsh
-  # For a full list of active aliases, run `alias`.
-  #
-  # Example aliases
-  # alias zshconfig="mate ~/.zshrc"
-  # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-  ###
-  ### Antigen
-  ###
-  # # install Antigen
-  # curl -L git.io/antigen > ~/antigen.zsh
-  # Configure Antigen
-  # sh -c "$(wget https://github.com/DanielAtKrypton/debian-dev-boilerplate/raw/master/src/.antigenrc -O ~/.antigenrc)"
-  # Config zsh to use Antigen
-  # sh -c "$(wget https://github.com/DanielAtKrypton/debian-dev-boilerplate/raw/master/src/.zshrc_extra -O ~/.zshrc_extra)"
-  source ~/.zshrc_extra
-
-  # Las "gems" de Ruby se instalarán en ~/.gems
-  export GEM_HOME=~/.gems
-  export PATH=~/.gems/bin:$PATH
+  # Bajo WSL2 se soporta ls --color
+  alias ls='ls --color=tty'
 
   # Locales
   export LANG=es_ES.UTF-8
@@ -194,13 +87,23 @@ if [ "$IS_WSL2" = true ] ; then
 
   # Alias
   alias c="cd /mnt/c/Users/luis"
+  alias sw="cd /mnt/c/Users/luis/00.git/03.github-sumwall/sumwall.browser"
   alias git="git.exe"
-  
-  # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+  # Instalo OhMyPosh en WSL2
+  # Fuente: https://ohmyposh.dev/docs/installation/linux
+  # sudo apt install unzip
+  # mkdir ~/bin
+  # curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
+  # PATH=$PATH:/home/luis/bin (ya lo tenía)
+  # Installing oh-my-posh themes in /home/luis/.cache/oh-my-posh/themes
+  # Instalo una fuente:
+  # ➜  ~ oh-my-posh font install
+  #    Successfully installed Meslo
+  # 
+  eval "$(oh-my-posh init zsh)"
 
 else
-
 
   # Variables de entorno para no enviar telemetría a Microsoft
   export DOTNET_CLI_TELEMETRY_OPTOUT=1
@@ -222,13 +125,6 @@ else
   # Descargo una librería de apoyo para ejecutar ciertas partes de estes cript en modo asíncrono
   if [[ ! -a ~/.zshrc.async ]]; then
     curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async
-  fi
-
-  # Detectar si estoy dentro de una sesión VSCODE
-  # De momento todavía no hago nada con esta info.
-  export IS_VSCODE=false
-  if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
-      export IS_VSCODE=true
   fi
 
   # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
@@ -593,19 +489,6 @@ else
         lp_gituntracked=
     fi
 
-    ##  echo "Debug ---"
-    #[[ ${querystaged} -eq 0 ]] && { echo "Querystaged: X";:; } || { echo "querystaged: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${git_patches_applied} -eq 0 ]] && { echo "git_patches_applied: X";:; } || { echo "git_patches_applied: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${git_patches_unapplied} -eq 0 ]] && { echo "git_patches_unapplied: X";:; } || { echo "git_patches_unapplied: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${gitaction} -eq 0 ]] && { echo "gitaction: X";:; } || { echo "gitaction: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${gitmisc} -eq 0 ]] && { echo "gitmisc: X";:; } || { echo "gitmisc: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${gitsha1} -eq 0 ]] && { echo "gitsha1: X";:; } || { echo "gitsha1: ${AMARILLO}yes${NORMAL}" ; }
-    #[[ ${lp_gituntracked} -eq 0 ]] && { echo "Untracked: X";:; } || { echo "Untracked: ${AZUL}●${NORMAL}" ; }
-    #[[ ${gitunstaged} -eq 0 ]] && { echo "Unstaged: X";:; } || { echo "Unstaged: ${ROJO}●${NORMAL}" ; }
-    #[[ ${gitstaged} -eq 0 ]] && { echo "Staged: X";:; } || { echo "Staged: ${VERDE}●${NORMAL}" ; }
-    #[[ ${lp_gituntracked} -eq 0 ]] && { echo "Untracked: X";:; } || { echo "Untracked: ${AZUL}●${NORMAL}" ; }
-    #echo "----"
-
     # Precolor
     if [[ ${lp_gitunpushed} -ne 0 ]]; then
       hook_com[staged]+="%B%F{yellow} "
@@ -633,56 +516,6 @@ else
   _vbe_add_prompt_0vcs () {
       _vbe_prompt_segment cyan default ${vcs_info_msg_0_}
   }
-
-  # Parámetros para la construcción del prompt
-  #
-  # Basic Components of Format Strings
-  # %b: Branch name. Displays the name of the current branch.
-  # %c: Number of commits ahead of remote.
-  # %u: Number of commits behind remote.
-  # %a: Action. This shows the current action, like 'MERGING', 'REBASING', etc.
-  # %r: Repository name. This is useful when working in a repo that's nested inside another.
-  # %R: Root directory of the repository. This shows the path to the top level of the repository.
-  # %s: Stash. This shows the number of stashes.
-  # %m: Whether the repo is "modified."
-  # %i: Information on whether there are staged changes.
-  # %I: More detailed information on the index state (staged changes).
-  # %n: Name of the repository if set.
-  #
-  # Use of Formatting Codes
-  # %F{color}: Sets the foreground color of the subsequent text (until %f or another %F is encountered). For example, %F{red} makes the text red.
-  # %f: Resets the foreground color to the default.
-  # %B: Start bold text.
-  # %b: Stop bold text.
-  # %U: Start underlined text.
-  # %u: Stop underlined text.
-  #
-
-  # Parse de Git mucho mas simplificado que usaré en entorno WSL2 que es más lento
-  #   local branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
-  #    if [ -n "$branch" ]; then
-  # simple_parse_git_branch() {
-  #     # Verificar si hay cambios no confirmados
-  #     if ! git diff --quiet 2>/dev/null; then
-  #       echo " ($branch %F{red}●%f)"  # Cambios no confirmados
-  #     else
-  #       # Verificar si hay commits para hacer push
-  #       if [ $(git rev-list @{u}..HEAD 2>/dev/null | wc -l) -gt 0 ]; then
-  #         echo " ($branch %F{red}●%f)"  # Commits por hacer push
-  #       else
-  #         # Verificar si hay commits para hacer pull
-  #         if [ $(git rev-list HEAD..@{u} 2>/dev/null | wc -l) -gt 0 ]; then
-  #           echo " ($branch %F{red}●%f)"  # Commits por hacer pull
-  #         else
-  #           # Si no hay estado especial, agregar un ícono de check
-  #           echo " ($branch %F{green}✓%f)"
-  #         fi
-  #       fi
-  #     fi
-  #   else
-  #     echo ""
-  #   fi
-  # }
 
   # Declarar y definir variables globales para el estado de git
   export GIT_PROMPT_CACHE=""
@@ -720,44 +553,6 @@ else
     # Actualizar el estado de git en segundo plano
     wsl2_parse_git_branch_cached
   }
-
-  # simple_parse_git_branch() {
-  #   # Obtener la rama actual, si existe
-  #   local branch
-  #   branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
-
-  #   # Usar 'git status' para hacer una única llamada en lugar de varias llamadas a git
-  #   local git_status
-  #   git_status=$(git status --porcelain --branch 2>/dev/null)
-
-  #   if [[ $git_status == *"ahead"* ]] || [[ $git_status == *"behind"* ]] || [[ $git_status == *"?? "* ]] || [[ $git_status == *" M "* ]]; then
-  #     echo " ($branch %F{red}●%f)"
-  #   else
-  #     echo " ($branch %F{green}✓%f)"
-  #   fi
-  # }
-
-  # simple_parse_git_branch_cached() {
-  #   if [[ -z "$GIT_PROMPT_CACHE" || "$PWD" != "$LAST_GIT_DIR" || $(( $(date +%s) - $GIT_PROMPT_LAST_UPDATE )) -ge 5 ]]; then
-  #   echo x
-  #     LAST_GIT_DIR="$PWD"
-  #     GIT_PROMPT_LAST_UPDATE=$(date +%s)
-
-  #     local branch
-  #     branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
-
-  #     local git_status
-  #     git_status=$(git status --porcelain --branch 2>/dev/null)
-
-  #     if [[ $git_status == *"ahead"* ]] || [[ $git_status == *"behind"* ]] || [[ $git_status == *"?? "* ]] || [[ $git_status == *" M "* ]]; then
-  #       GIT_PROMPT_CACHE=" ($branch %F{red}●%f)"
-  #     else
-  #       GIT_PROMPT_CACHE=" ($branch %F{green}✓%f)"
-  #     fi
-  #   fi
-
-  #   echo "$GIT_PROMPT_CACHE"
-  # }
 
   # Parametrizo según OS
   #
@@ -850,55 +645,23 @@ else
       fi
       #alias python="/usr/bin/python3"
 
-      # Mi PROMPT
+      # Mi PROMPT para root
       if [[ $EUID -eq 0 ]]; then
         # En el caso de ser root
         PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
       else
-        if [ "$IS_WSL2" = true ] ; then
-          # PATH para WSL2
-          export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
-          PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
-          PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
-          PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
-          PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
-          PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
-          PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
-          PATH=$PATH:"/usr/local/go/bin"
+        # Para un usuario normal
+        # PATH para Linux
+        export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
 
-          # No puedo cambiar el HOME porque rompe la integracion con Docker.
-          # Cambio el comando "cd"
-          #cd() {
-          #  if [ -z "$1" ]; then
-          #    builtin cd /mnt/c/Users/${USER}
-          #  else
-          #    builtin cd "$@"
-          #  fi
-          #}
-          #cd
-          alias c="cd /mnt/c/Users/luis"
-          alias git="git.exe"
+        # Mi usuario normal con Git info en el prompt muy detallado
+        PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
 
-          # Selecciono el contexto adecuado con docker (si está instalado)
-          #docker context use default &>/dev/null # 2>/dev/null
+        # Path para shfmt
+        export SHFMT_PATH="/usr/bin/shfmt"
 
-          # DEPRECATED: Uso Startship, no necesito poner el prompt aquí
-          # Al estar bajo WSL2 uso un prompt simplificado (mucho más rápido)
-          # PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${GIT_PROMPT_CACHE} %# '
-        else
-
-          # PATH para Linux
-          export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
-
-          # Mi usuario normal con Git info en el prompt muy detallado
-          PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
-
-          # Path para shfmt
-          export SHFMT_PATH="/usr/bin/shfmt"
-
-          # Me aseguro de que el agente SSH esté en ejecución
-          eval "$(ssh-agent)" &>/dev/null
-        fi
+        # Me aseguro de que el agente SSH esté en ejecución
+        eval "$(ssh-agent)" &>/dev/null
       fi
 
       ;;
@@ -924,73 +687,58 @@ else
   export LC_IDENTIFICATION="es_ES.UTF-8"
   export LC_ALL="es_ES.UTF-8"
 
-  # Implemento Starship para el prompt
-  # Solo si no estoy en WSL2
-  # ==============================================================================
-  if [ "$IS_WSL2" = false ] ; then
-    if which starship >/dev/null 2>&1; then
-      #echo "El ejecutable existe"
-      # Variables
-      LOCAL_FILE=~/.config/starship.toml
-      REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/starship.toml"
-      TEMP_REMOTE_FILE=/tmp/starship_remote.toml
+  if which starship >/dev/null 2>&1; then
+    #echo "El ejecutable existe"
+    # Variables
+    LOCAL_FILE=~/.config/starship.toml
+    REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/starship.toml"
+    TEMP_REMOTE_FILE=/tmp/starship_remote.toml
 
-      # Detectar el sistema operativo para usar el comando 'date' correcto
-      case "$OSTYPE" in
-        # MacOS
-        (darwin|freebsd)*)
-          ONE_DAY_AGO=$(date -v -1d +%s)
-          ;;
-        # Linux
-        *)
-          ONE_DAY_AGO=$(date -d '1 day ago' +%s)
-          ;;
-      esac
+    # Detectar el sistema operativo para usar el comando 'date' correcto
+    case "$OSTYPE" in
+      # MacOS
+      (darwin|freebsd)*)
+        ONE_DAY_AGO=$(date -v -1d +%s)
+        ;;
+      # Linux
+      *)
+        ONE_DAY_AGO=$(date -d '1 day ago' +%s)
+        ;;
+    esac
 
-      # Comprobar si el archivo local no existe
-      if [[ ! -a $LOCAL_FILE ]]; then
-        #echo "El fichero local no existe. Descargando..."
-        mkdir -p ~/.config
-        curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
-        touch $LOCAL_FILE
-      else
-        # Verificar si se ha descargado en el último día
-        if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
-          #echo "Más de un día desde la última verificación. Comprobando cambios..."
-          # Descargar el archivo remoto temporalmente
-          curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+    # Comprobar si el archivo local no existe
+    if [[ ! -a $LOCAL_FILE ]]; then
+      #echo "El fichero local no existe. Descargando..."
+      mkdir -p ~/.config
+      curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
+      touch $LOCAL_FILE
+    else
+      # Verificar si se ha descargado en el último día
+      if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
+        #echo "Más de un día desde la última verificación. Comprobando cambios..."
+        # Descargar el archivo remoto temporalmente
+        curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
 
-          # Comprobar si el archivo local es diferente del remoto
-          if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-            #echo "El fichero local es diferente. Actualizando..."
-            mv $TEMP_REMOTE_FILE $LOCAL_FILE
-          else
-            #echo "El fichero local está actualizado."
-            rm $TEMP_REMOTE_FILE
-          fi
-
-          # Actualizar la marca de tiempo del archivo de verificación
-          touch $LOCAL_FILE
-        #else
-          #echo "La comprobación se hizo en la último día. No es necesario descargar."
+        # Comprobar si el archivo local es diferente del remoto
+        if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
+          #echo "El fichero local es diferente. Actualizando..."
+          mv $TEMP_REMOTE_FILE $LOCAL_FILE
+        else
+          #echo "El fichero local está actualizado."
+          rm $TEMP_REMOTE_FILE
         fi
+
+        # Actualizar la marca de tiempo del archivo de verificación
+        touch $LOCAL_FILE
+      #else
+        #echo "La comprobación se hizo en la último día. No es necesario descargar."
       fi
-
-      # Integro startship en mi shell
-      eval "$(starship init zsh)"
     fi
+
+    # Integro startship en mi shell
+    eval "$(starship init zsh)"
   fi
   # ==============================================================================
-
-  # Implemento Oh-My-Zsh - Solo WSL2 - En pruebas
-  # ==============================================================================
-  if [ "$IS_WSL2" = true ] ; then
-    echo vamos
-    # If you come from bash you might have to change your $PATH.
-    # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-
-
-  fi
 
 # LuisPa: -------------------------------------------------------------- END
 fi
