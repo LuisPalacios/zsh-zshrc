@@ -88,7 +88,6 @@ if [ "$IS_WSL2" = true ] ; then
   # Alias
   alias c="cd /mnt/c/Users/luis"
   alias sw="cd /mnt/c/Users/luis/00.git/03.github-sumwall/sumwall.browser"
-  alias zz="/mnt/c/Users/luis/00.git/02.github-luispa/zsh-zshrc"
   alias git="git.exe"
 
   # Instalo OhMyPosh en WSL2
