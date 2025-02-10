@@ -1,5 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "final_space": true,
+  "version": 3,
   "palette": {
     "black": "#262B44",
     "blue": "#4B95E9",
@@ -35,19 +37,21 @@
       "alignment": "left",
       "segments": [
         {
+          "type": "session",
           "style": "plain",
-          "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:",
-          "type": "session"
+          "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:"
         },
         {
+          "type": "path",
+          "style": "plain",
           "properties": {
             "style": "folder"
           },
-          "template": "<p:cyan>{{ .Path }}</>",
-          "type": "path",
-          "style": "plain"
+          "template": "<p:cyan>{{ .Path }}</>"
         },
         {
+          "type": "git",
+          "style": "powerline",
           "properties": {
             "branch_max_length": 25,
             "fetch_status": true,
@@ -56,8 +60,6 @@
           "template": " ({{ if .UpstreamURL }}{{ url .UpstreamIcon .UpstreamURL }} {{ end }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }})",
           "foreground": "p:green",
           "background": "transparent",
-          "type": "git",
-          "style": "powerline",
           "foreground_templates": [
             "{{ if or (.Working.Changed) (.Staging.Changed) }}p:orange{{ end }}",
             "{{ if and (gt .Ahead 0) (gt .Behind 0) }}p:red{{ end }}",
@@ -67,14 +69,14 @@
         },
 
         {
+          "type": "status",
+          "style": "plain",
           "properties": {
             "always_enabled": true
           },
           "template": " {{ if gt .Code 0 }}<p:red>\uf00d</> {{ end }}</><foreground>\u276f</>",
           "foreground": "p:white",
-          "background": "transparent",
-          "type": "status",
-          "style": "plain"
+          "background": "transparent"
         }
       ]
     }
@@ -110,7 +112,5 @@
         "az"
       ]
     }
-  ],
-  "version": 3,
-  "final_space": true
+  ]
 }
