@@ -1,57 +1,55 @@
-# Fichero .zshrc de LuisPa 2025
+# Fichero .zshrc de LuisPa 6 Mayo 2025 (producción)
 # Utilizado en MacOS (con brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
-# - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
 #
-# - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
+# - Mis ficheros zsh - https://github.com/LuisPalacios/zsh-zshrc
+# - ¡Adiós Bash, hola Zsh! - https://www.luispa.com/administraci%C3%B3n/2024/04/23/zsh.html
+# - Terminales con tmux - https://www.luispa.com/administraci%C3%B3n/2024/04/25/tmux.html
+# - WSL2 en Windows - https://www.luispa.com/desarrollo/2024/08/25/win-desarrollo.html#wsl-2
+#
 # DEPENDIENCIAS
-#   1) Script .zshrc.async
-#      Lo descargo automáticamente desde https://github.com/LuisPalacios/zsh-async
-#      se trata de un FORK del proyecto https://github.com/mafredri/zsh-async
-#      Se trata de una librería de apoyo para ejecutar código en modo asíncrono
+# - .zshrc.async
+#   Descarga una copia del original utomáticamente desde este script, que
+#   tengo en mi propio repo: https://github.com/LuisPalacios/zsh-async
+#   Es una librería de apoyo para ejecutar código en modo asíncrono
+#   Hice un fork de https://github.com/mafredri/zsh-async
 #
 # Creditos:
-#   1) Ideas y más en "My .zshrc" -> https://github.com/vincentbernat/zshrc
+# - He copiado ideas desde "My .zshrc" -> https://github.com/vincentbernat/zshrc
 #
-# Probado en:
-#   linux, normal user and root - OK
-#   MacOS normal user - OK
-#   MacOS root - usa una versión especial de bash que consume /root.lprofile
+# Multiplataforma:
+# - linux, usuario normal y root: Funciona
+# - MacOS, usuario normal: Funciona
+#   MacOS, root: no lo uso. MacOS usa bash espcial que consume /root.lprofile
+# - WSL2, usuario normal: Funciona
 #
-# Activar para debug
+# Debug: En caso de necesitarlo, activar la línea siguiente
 #set -x
 
-# Detectar si estoy dentro de una sesión WSL2
-# De momento todavía no hago nada con esta info.
+# Detecciones:
+# Estoy dentro de una sesión WSL2?
 export IS_WSL2=false
-# Verificar si wslinfo --wsl-version existe y retorna 0
 if wslinfo --wsl-version > /dev/null 2>&1; then
   export IS_WSL2=true
 fi
-
-# Detectar si estoy dentro de una sesión VSCODE
-# De momento todavía no hago nada con esta info.
+# Estoy dentro de una sesión VSCode?
 export IS_VSCODE=false
 if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
     export IS_VSCODE=true
 fi
 
-# Si WSL2, version simple y salgo
-if [ "$IS_WSL2" = true ] ; then
+# -----------------------------------------------------------------------------
+# Comunes
+# -----------------------------------------------------------------------------
+#
 
-  # Path para WSL
-  export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
-  export PATH=$PATH:"/home/luis/bin"
-  export PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
-  export PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
-  export PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
-  export PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
-  export PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
-  export PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
-  export PATH=$PATH:"/usr/local/go/bin"
+# Parametrización de Zsh común
+#
+parametriza_zsh_comun() {
 
   # Personalización de los colores del comando 'ls'
+  # LS_COLORS se usan en ls de GNU,
   export LS_COLORS='fi=00:mi=00:mh=00:ln=01;94:or=01;31:di=01;36:ow=04;01;34:st=34:tw=04;34:'
   LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
   LS_COLORS+=':*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32'
@@ -62,6 +60,10 @@ if [ "$IS_WSL2" = true ] ; then
   LS_COLORS+=':*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35'
   LS_COLORS+=':*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35'
   LS_COLORS+=':*.dl=01;35:*.gl=01;35:*.wmv=01;35'
+
+  # Personalización de los colores del tree de GNU
+  export TREE_COLORS=${LS_COLORS//04;}
+
   # mientras que LSCOLORS se usa en el ls de BSD
   export CLICOLOR=1
   export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
@@ -85,112 +87,6 @@ if [ "$IS_WSL2" = true ] ; then
   export LC_IDENTIFICATION="es_ES.UTF-8"
   export LC_ALL="es_ES.UTF-8"
 
-  # Alias
-  alias c="cd /mnt/c/Users/luis"
-  alias git="git.exe"
-
-  # Instalo OhMyPosh en WSL2
-  # Fuente: https://ohmyposh.dev/docs/installation/linux
-  # sudo apt install unzip
-  # mkdir ~/bin
-  # curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
-  # PATH=$PATH:/home/luis/bin (ya lo tenía)
-  # Installing oh-my-posh themes in /home/luis/.cache/oh-my-posh/themes
-  # Instalo una fuente:
-  # ➜  ~ oh-my-posh font install
-  #    Successfully installed Meslo
-  #
-  # La primera vez arranco sin tema, lo salvo y lo edito
-  # oh-my-posh config export --output ~/.luispa.omp.json
-  #  Solo le quité el naranja del directorio al de por defecto
-  #  El de por defecto es jandedobbeleer.omp.json
-  #
-  eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
-
-else
-
-  # Variables de entorno para no enviar telemetría a Microsoft
-  export DOTNET_CLI_TELEMETRY_OPTOUT=1
-
-  # In bash escape-delete deletes a single word. However in ZSH a variable defines which
-  # special characters are considered part of a word. By default its value is
-  # WORDCHARS='*?_-.[]~=/&;!#$%^(){}<>'
-  # In order to behave similar to bash, I'm modifying it, in example removing '/' so
-  # its more convenient when deleting directory componentes while in the CLI.
-  WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
-
-  # Elimino el mensaje "Last login" en las sesiones y nuevos tabs.
-  [ ! -f ~/.hushlogin ] && touch ~/.hushlogin
-
-  # Si estoy en un MacOS necesito actualizar el PATH con homebrew
-  if [[ "$(uname)" == "Darwin" ]]; then whence -p brew &>/dev/null || eval "$(/opt/homebrew/bin/brew shellenv)"; fi
-
-  # IMPORTANTE:
-  # Descargo una librería de apoyo para ejecutar ciertas partes de estes cript en modo asíncrono
-  if [[ ! -a ~/.zshrc.async ]]; then
-    curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async
-  fi
-
-  # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
-  #
-  # Esto podría haberlo configurado de dos formas. Cuando hago login con mi
-  # usuario y arranza zsh. He optado por la opcion (2)
-  #
-  # 1) REEMPLAZA zsh por tmux - Que zsh arranque pero inmediatamente sea
-  #    reemplazada por tmux
-  # 2) MANTENER zsh - Que zsh arranque y me quede en él, para arrancar tmux
-  #    manualmente cuando yo quiera.
-  #
-  # OPCION 1) REEMPLAZAR
-  # [ -t 1 ]: Comprueba si el file descriptor 1 (stdout) está asociado a un terminal.
-  # (( $+commands[tmux] )): Comprueba si el ejecutable tmux está en el PATH
-  # [[ -f ~/.tmux.conf ]]: Compruebo si tengo el fichero  de configuración
-  # $PPID != 1: Me aseguro que mi proceso padre no es 1, que significaría que esta
-  # sesión se está ejecutando desde init/systemd.
-  # $$ != 1: Me aseguro que mi número de proceso no es el 1, que sería un desastre ;-)
-  # $TERM != dumb, linux, screen, xterm. En esos casos arranco sin tmux, por ejemplo
-  # me interesa que gnome-terminal y terminator ejecuten tmux, pero xterm no.
-  # -z $TMUX: Me aseguro de que no esté puesta la variable TMUX, es decir que no este
-  # ya en una sesión encadenada de tmux
-  # if (tmux has-session -t TMUX); Si ya hay una sesión ejecutándose me conecto con ella.
-  # en caso contrario arranco una sesión nueva
-  #
-  # (Copia del script "t" en el PATH)
-  # ------- ------- ------- ------- ------- -------
-  # #!/usr/bin/env zsh
-  # #By LuisPa 2024
-  # #Ejecuto tmux si es que debo/puedo
-  # if [ -t 1 ] && (( $+commands[tmux] )) && \
-  #       [[ -f ~/.tmux.conf && \
-  #                $PPID != 1 && \
-  #                $$ != 1 && \
-  #                $TERM != dumb && \
-  #                $TERM != xterm && \
-  #                $TERM != linux && \
-  #                $TERM != screen* && \
-  #                $IS_VSCODE != true && \
-  #                -z $TMUX ]]; then
-  #     if (tmux has-session -t TMUX >/dev/null 2>&1); then
-  #         exec tmux attach -t TMUX >/dev/null 2>&1
-  #     else
-  #         exec tmux new -s TMUX >/dev/null 2>&1
-  #    fi
-  # fi
-  # ------- ------- ------- ------- ------- -------
-  #
-  # OPCION 2) MANTENER
-  # Como decía, podría haber dejado las líneas anteriores sin comentar que
-  # provocarían que se ejecute tmux reemplazando la shell actual.
-  # He optado por dejarlas comentadas y si necesito tmux lo ejecuto
-  # llamando al alias 't' (con exec) o 'tt' (sin exec).
-  #
-  # Esta opción me da más flexibilidad, puedo elegir cuándo uso
-  # tmux, lo cual es muy útil si me conecto a equipos linux remotos
-  # que tienen zsh y tmux (y copia de este .zshrc, .tmux.conf, etc)
-  alias t="exec ~/Nextcloud/priv/bin/t"
-  alias tt="~/Nextcloud/priv/bin/t"
-
-
   # Detecto e inicializo el valor de la variable SHELL
   #
   # Si mi $SHELL acaba en */zsh o */zsh-static, no hago nada.
@@ -203,31 +99,17 @@ else
         *) SHELL=${${0#-}:c:A}
     esac
 
-  # Para debug
-  #NORMAL="\033[0;39m"
-  #ROJO="\033[1;31m"
-  #VERDE="\033[1;32m"
-  #AMARILLO="\033[1;33m"
-  #AZUL="\033[1;34m"
+  # Variables de entorno para no enviar telemetría a Microsoft
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-  # Personalización de los colores del tree de GNU
-  export TREE_COLORS=${LS_COLORS//04;}
+  # En bash, escape-delete elimina una sola palabra. Sin embargo, en ZSH hace
+  # falta una variable define qué caracteres especiales se consideran parte de
+  # una palabra. Esta es mi versión modificada, en la que he eliminado '/' para
+  # que sea más conveniente al eliminar componentes de directorio desde la CLI.
+  WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 
-  # Personalización de los colores del comando 'ls'
-  # LS_COLORS se usan en ls de GNU,
-  export LS_COLORS='fi=00:mi=00:mh=00:ln=01;94:or=01;31:di=01;36:ow=04;01;34:st=34:tw=04;34:'
-  LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
-  LS_COLORS+=':*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32'
-  LS_COLORS+=':*.tar=00;31:*.tbz=00;31:*.tgz=00;31:*.rpm=00;31:*.deb=00;31:*.arj=00;31'
-  LS_COLORS+=':*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.zip=00;31:*.zoo=00;31:*.z=00;31'
-  LS_COLORS+=':*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.tb2=00;31:*.tz2=00;31:*.tbz2=00;31'
-  LS_COLORS+=':*.avi=01;35:*.bmp=01;35:*.fli=01;35:*.gif=01;35:*.jpg=01;35:*.jpeg=01;35'
-  LS_COLORS+=':*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35'
-  LS_COLORS+=':*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35'
-  LS_COLORS+=':*.dl=01;35:*.gl=01;35:*.wmv=01;35'
-  # mientras que LSCOLORS se usa en el ls de BSD
-  export CLICOLOR=1
-  export LSCOLORS='GxExDxDxCxDxDxFxFxexEx'
+  # Elimino el mensaje "Last login" en las sesiones y nuevos tabs.
+  [ ! -f ~/.hushlogin ] && touch ~/.hushlogin
 
   # No poner líneas de comando en la lista de historial si son duplicados
   setopt HIST_IGNORE_DUPS
@@ -239,15 +121,15 @@ else
   # mostrar información de branches de Git por ejemplo.
   setopt PROMPT_SUBST
 
-  # Use emacs keybindings even if our EDITOR is set to vi
+  # Uso los keybindings emacs incluso si el editor está puesto a 'vi'
   bindkey -e
 
-  # Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+  # Mantener 1000 líneas de history
   HISTSIZE=1000
   SAVEHIST=1000
   HISTFILE=~/.zsh_history
 
-  # Use modern completion system
+  # Usar el sistema de auto completado moderno
   autoload -Uz compinit
   compinit
   zstyle ':completion:*' auto-description 'specify: %d'
@@ -271,6 +153,108 @@ else
   # como antes o después de un comando, permitiendo a los usuarios o scripts
   # añadir comportamientos personalizados en estos puntos.
   autoload -Uz add-zsh-hook
+
+}
+
+# Ejecutar Oh My Posh
+#
+ejecuta_oh_my_posh() {
+
+  # Instalación de Oh My Posh
+  #
+  # MacOS, Windows y Linux:
+  #   Fuente: https://ohmyposh.dev/docs/installation/linux
+  #
+  # WSL2:
+  #   sudo su -
+  #   apt update && apt upgrade -y && apt full-upgrade -y
+  #   apt install unzip
+  #   mkdir ~/bin
+  #   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
+  #     Instala temas en /home/luis/.cache/oh-my-posh/themes
+  #   Revisar el PATH (en mi caso ya tengo /home/luis/bin en este .zshrc)
+  #   Salgo y entro de nuevo a WSL2
+  #
+  #   Instalo la fuente de Meslo:
+  #     oh-my-posh font install
+  #
+  #   La primera vez arranca con el tema por defecto, lo renombro
+  #    oh-my-posh config export --output ~/.luispa.omp.json
+  #    Solo le quité el naranja del directorio al de por defecto
+  #    el de por defecto es jandedobbeleer.omp.json
+  #
+  # UPGRADES: Se pueden hacer desde el CLI, pero no siempre (major):
+  #
+  # ❯ oh-my-posh upgrade (si detecta que hay un cambio de major no lo hará)
+  # ❯ oh-my-posh upgrade --force (para forzar la actualización)
+  #
+
+  #
+  # Primero comprobar si está Oh-My-Posh instalado
+  if ! command -v oh-my-posh >/dev/null 2>&1; then
+    echo "Necesitas instalar 'Oh My Posh', más info en .zshrc"
+  else
+
+    # Compruebo si tengo mi tema
+    LOCAL_FILE=~/.luispa.omp.json
+    REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.luispa.omp.json"
+    TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
+
+    # Detectar el sistema operativo para usar el comando 'date' correcto
+    case "$OSTYPE" in
+      # MacOS
+      (darwin|freebsd)*)
+        ONE_DAY_AGO=$(date -v -1d +%s)
+        ;;
+      # Linux|WSL2
+      *)
+        ONE_DAY_AGO=$(date -d '1 day ago' +%s)
+        ;;
+    esac
+
+    # Comprobar si el archivo local no existe
+    if [[ ! -a $LOCAL_FILE ]]; then
+      curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
+      touch $LOCAL_FILE
+    else
+      # Verificar si se ha descargado en el último día
+      if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
+        # Descargar el archivo remoto temporalmente
+        curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+        # Comprobar si el archivo local es diferente del remoto
+        if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
+          # El fichero local es diferente del remoto, actualizo copiando el remoto al local
+          mv $TEMP_REMOTE_FILE $LOCAL_FILE
+        else
+          rm $TEMP_REMOTE_FILE
+        fi
+        touch $LOCAL_FILE
+      fi
+    fi
+
+    # Arranco Oh My Posh
+    eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
+  fi
+
+}
+
+
+# Ejecutar (linux/mac) git async y starship
+#
+ejecuta_async_y_starship() {
+
+  # IMPORTANTE:
+  # Descargo una librería de apoyo para ejecutar ciertas partes de estes cript en modo asíncrono
+  if [[ ! -a ~/.zshrc.async ]]; then
+    curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async
+  fi
+
+  # Para debug
+  #NORMAL="\033[0;39m"
+  #ROJO="\033[1;31m"
+  #VERDE="\033[1;32m"
+  #AMARILLO="\033[1;33m"
+  #AZUL="\033[1;34m"
 
   # Async helpers
   #
@@ -506,15 +490,12 @@ else
 
   }
 
-  # Asynchronous VCS status
-  if [ "$IS_WSL2" = false ] ; then
-    # Solo si no estoy en WSL2
-    source ~/.zshrc.async
-    async_init
-    _vbe_vcs_async_start
-    add-zsh-hook precmd _vbe_vcs_precmd
-    add-zsh-hook chpwd _vbe_vcs_chpwd
-  fi
+  # Este bloque solo se puede ejecutar si no estoy en WSL2
+  source ~/.zshrc.async
+  async_init
+  _vbe_vcs_async_start
+  add-zsh-hook precmd _vbe_vcs_precmd
+  add-zsh-hook chpwd _vbe_vcs_chpwd
 
   # Add VCS information to the prompt
   _vbe_add_prompt_0vcs () {
@@ -526,6 +507,9 @@ else
   GIT_PROMPT_LAST_UPDATE=0
   LAST_GIT_DIR=""
 
+  # Revisar si este código hace falta cuando NO estoy en WSL2 y si es así
+  # renombrar esta funcion
+  #
   wsl2_parse_git_branch_cached() {
     local branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
     if [ -n "$branch" ]; then
@@ -558,8 +542,6 @@ else
     wsl2_parse_git_branch_cached
   }
 
-  # Parametrizo según OS
-  #
   # Función para averiguar la opción de usar colores en el comando ls
   function test-ls-args {
     local cmd="$1"          # ls, gls, colorls, ...
@@ -603,26 +585,6 @@ else
       # Mi PROMPT
       PROMPT='🍏 %F{green}%B%n%b@%F{yellow}%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
 
-      # PATH
-      export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$HOME/dev-tools/kombine.osx:$PATH
-      launchctl setenv PATH ".:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH"
-
-      # Homebrew
-      eval "$(/opt/homebrew/bin/brew shellenv)"                                          # Homebrew en Mac ARM
-      #eval "$(/usr/local/bin/brew shellenv)"                                            # Homebrew en Mac Intel
-      # Ruby y Gems
-      export PATH="/opt/homebrew/opt/ruby/bin:~/.gems/bin:$PATH"   # Versión para Mac ARM
-      #export PATH="/usr/local/opt/ruby/bin:~/.gems/bin:$PATH"     # Versión para Mac Intel
-
-      # Utilizo CLANG 17 y lo he instalado vía Homebrew
-      export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
-      export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
-      export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
-      export CC="/opt/homebrew/opt/llvm@17/bin/clang"
-      export CXX="/opt/homebrew/opt/llvm@17/bin/clang++"
-      export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
-      export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
-
       # ALIAS
       alias grep="/usr/bin/grep -d skip"
       alias e="/usr/local/bin/code"
@@ -635,9 +597,6 @@ else
       # SSH - Lo arranco en el background porque tarda 1 o 2 segundos
       # De esta forma consigo el prompt inmediatamente.
       (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
-
-      # Path para shfmt
-      export SHFMT_PATH="/opt/homebrew/bin/shfmt"
 
       ;;
     # Linux
@@ -654,15 +613,8 @@ else
         # En el caso de ser root
         PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
       else
-        # Para un usuario normal
-        # PATH para Linux
-        export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
-
         # Mi usuario normal con Git info en el prompt muy detallado
         PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
-
-        # Path para shfmt
-        export SHFMT_PATH="/usr/bin/shfmt"
 
         # Me aseguro de que el agente SSH esté en ejecución
         eval "$(ssh-agent)" &>/dev/null
@@ -671,25 +623,6 @@ else
       ;;
   esac
 
-  # Las "gems" de Ruby se instalarán en ~/.gems
-  export GEM_HOME=~/.gems
-  export PATH=~/.gems/bin:$PATH
-
-  # Locales
-  export LANG=es_ES.UTF-8
-  export LC_CTYPE="es_ES.UTF-8"
-  export LC_NUMERIC="es_ES.UTF-8"
-  export LC_TIME="es_ES.UTF-8"
-  export LC_COLLATE="es_ES.UTF-8"
-  export LC_MONETARY="es_ES.UTF-8"
-  export LC_MESSAGES="es_ES.UTF-8"
-  export LC_PAPER="es_ES.UTF-8"
-  export LC_NAME="es_ES.UTF-8"
-  export LC_ADDRESS="es_ES.UTF-8"
-  export LC_TELEPHONE="es_ES.UTF-8"
-  export LC_MEASUREMENT="es_ES.UTF-8"
-  export LC_IDENTIFICATION="es_ES.UTF-8"
-  export LC_ALL="es_ES.UTF-8"
 
   if which starship >/dev/null 2>&1; then
     #echo "El ejecutable existe"
@@ -744,5 +677,165 @@ else
   fi
   # ==============================================================================
 
-# LuisPa: -------------------------------------------------------------- END
+}
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
+#
+# -----------------------------------------------------------------------------
+# WSL2
+# -----------------------------------------------------------------------------
+if [ "$IS_WSL2" = true ] ; then
+
+  # PATH WSL2------------------------------------------------------------------
+  #
+  export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
+  export PATH=$PATH:"/home/luis/bin:/mnt/c/Users/luis/dev-tools/kombine.win"
+  export PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
+  export PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
+  export PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
+  export PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
+  export PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
+  export PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
+  export PATH=$PATH:"/usr/local/go/bin"
+
+  # Comunes
+  #
+  parametriza_zsh_comun
+
+  # Alias
+  alias c="cd /mnt/c/Users/luis"
+  alias git="git.exe"
+
+  # Arrancar en modo Oh My Posh
+  ejecuta_oh_my_posh
+
+  # No poner nada detrás
+
+# --------------------------------------------------------------------------------
+# Resto: MacOS, Linux
+# --------------------------------------------------------------------------------
+else
+
+  # PATH MacOS Y Linux -----------------------------------------------------------
+  #
+  case "$OSTYPE" in
+
+    (darwin|freebsd)*)
+       # PATH MacOS---------------------------------------------------------------
+      export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$HOME/dev-tools/kombine.osx:$PATH
+      launchctl setenv PATH ".:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH"
+      # actualizar el PATH con homebrew
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+      #if [[ "$(uname)" == "Darwin" ]]; then whence -p brew &>/dev/null || eval "$(/opt/homebrew/bin/brew shellenv)"; fi
+      # Ruby y Gems
+      export PATH="/opt/homebrew/opt/ruby/bin:~/.gems/bin:$PATH"   # Versión para Mac ARM
+      #export PATH="/usr/local/opt/ruby/bin:~/.gems/bin:$PATH"     # Versión para Mac Intel
+      # Utilizo CLANG 17 y lo he instalado vía Homebrew
+      export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+      export CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@17/include"
+      export LIBRARY_PATH="/opt/homebrew/opt/llvm@17/lib"
+      export CC="/opt/homebrew/opt/llvm@17/bin/clang"
+      export CXX="/opt/homebrew/opt/llvm@17/bin/clang++"
+      export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
+      export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
+      # Path para shfmt
+      export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+      ;;
+    *)
+      # PATH Linux---------------------------------------------------------------
+      #
+      if [[ $EUID -eq 0 ]]; then
+        # En el caso de ser root no hago nada
+        :
+      else
+        # Para un usuario normal
+        export PATH=.:$HOME/Nextcloud/priv/bin:$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
+        export SHFMT_PATH="/usr/bin/shfmt"
+      fi
+      ;;
+  esac
+
+  # GEMS de Ruby se instalan en ~/.gems, relacionado con PATH:
+  export GEM_HOME=~/.gems
+  export PATH=~/.gems/bin:$PATH
+
+  # Comunes
+  #
+  parametriza_zsh_comun
+
+  # TMUX MacOS Y Linux ----------------------------------------------------------
+  #
+  # Este código está comentado porque no lo uso.
+  #
+  # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
+  # Esto podría haberlo configurado de dos formas. Cuando hago login con mi
+  # usuario y arranza zsh. He optado por la opcion (2)
+  #
+  # 1) REEMPLAZA zsh por tmux - Que zsh arranque pero inmediatamente sea
+  #    reemplazada por tmux
+  # 2) MANTENER zsh - Que zsh arranque y me quede en él, para arrancar tmux
+  #    manualmente cuando yo quiera.
+  #
+  # OPCION 1) REEMPLAZAR
+  # [ -t 1 ]: Comprueba si el file descriptor 1 (stdout) está asociado a un terminal.
+  # (( $+commands[tmux] )): Comprueba si el ejecutable tmux está en el PATH
+  # [[ -f ~/.tmux.conf ]]: Compruebo si tengo el fichero  de configuración
+  # $PPID != 1: Me aseguro que mi proceso padre no es 1, que significaría que esta
+  # sesión se está ejecutando desde init/systemd.
+  # $$ != 1: Me aseguro que mi número de proceso no es el 1, que sería un desastre ;-)
+  # $TERM != dumb, linux, screen, xterm. En esos casos arranco sin tmux, por ejemplo
+  # me interesa que gnome-terminal y terminator ejecuten tmux, pero xterm no.
+  # -z $TMUX: Me aseguro de que no esté puesta la variable TMUX, es decir que no este
+  # ya en una sesión encadenada de tmux
+  # if (tmux has-session -t TMUX); Si ya hay una sesión ejecutándose me conecto con ella.
+  # en caso contrario arranco una sesión nueva
+  #
+  # (Copia del script "t" en el PATH)
+  # ------- ------- ------- ------- ------- -------
+  # #!/usr/bin/env zsh
+  # #By LuisPa 2024
+  # #Ejecuto tmux si es que debo/puedo
+  # if [ -t 1 ] && (( $+commands[tmux] )) && \
+  #       [[ -f ~/.tmux.conf && \
+  #                $PPID != 1 && \
+  #                $$ != 1 && \
+  #                $TERM != dumb && \
+  #                $TERM != xterm && \
+  #                $TERM != linux && \
+  #                $TERM != screen* && \
+  #                $IS_VSCODE != true && \
+  #                -z $TMUX ]]; then
+  #     if (tmux has-session -t TMUX >/dev/null 2>&1); then
+  #         exec tmux attach -t TMUX >/dev/null 2>&1
+  #     else
+  #         exec tmux new -s TMUX >/dev/null 2>&1
+  #    fi
+  # fi
+  # ------- ------- ------- ------- ------- -------
+  #
+  # OPCION 2) MANTENER
+  # Como decía, podría haber dejado las líneas anteriores sin comentar que
+  # provocarían que se ejecute tmux reemplazando la shell actual.
+  # He optado por dejarlas comentadas y si necesito tmux lo ejecuto
+  # llamando al alias 't' (con exec) o 'tt' (sin exec).
+  #
+  # Esta opción me da más flexibilidad, puedo elegir cuándo uso
+  # tmux, lo cual es muy útil si me conecto a equipos linux remotos
+  # que tienen zsh y tmux (y copia de este .zshrc, .tmux.conf, etc)
+  alias t="exec ~/Nextcloud/priv/bin/t"
+  alias tt="~/Nextcloud/priv/bin/t"
+
+
+  # Arrancar el modo git asíncrono y starship
+  # DEPRECADO: Ya no uso starship, pero lo dejo por si acaso
+  #ejecuta_async_y_starship
+
+  # Arrancar en modo Oh My Posh
+  ejecuta_oh_my_posh
+
+  # No poner nada detrás
 fi
+
+# LuisPa: -------------------------------------------------------------- END

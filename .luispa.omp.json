@@ -26,10 +26,10 @@
   },
   "console_title_template": "{{ .Shell }} in {{ .Folder }}",
   "upgrade": {
-    "source": "cdn",
+    "notice": true,
     "interval": "168h",
     "auto": false,
-    "notice": false
+    "source": "cdn"
   },
   "blocks": [
     {
