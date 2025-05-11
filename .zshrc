@@ -1,4 +1,5 @@
-# Fichero .zshrc de LuisPa 6 Mayo 2025 (producción)
+# Fichero .zshrc de LuisPa
+# Versión: 11 Mayo 2025
 # Utilizado en MacOS (con brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
