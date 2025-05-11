@@ -87,7 +87,6 @@ if [ "$IS_WSL2" = true ] ; then
 
   # Alias
   alias c="cd /mnt/c/Users/luis"
-  alias sw="cd /mnt/c/Users/luis/00.git/03.github-sumwall/sumwall.browser"
   alias git="git.exe"
 
   # Instalo OhMyPosh en WSL2
@@ -100,14 +99,14 @@ if [ "$IS_WSL2" = true ] ; then
   # Instalo una fuente:
   # ➜  ~ oh-my-posh font install
   #    Successfully installed Meslo
-  # 
+  #
   # La primera vez arranco sin tema, lo salvo y lo edito
   # oh-my-posh config export --output ~/.luispa.omp.json
   #  Solo le quité el naranja del directorio al de por defecto
   #  El de por defecto es jandedobbeleer.omp.json
   #
   eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
- 
+
 else
 
   # Variables de entorno para no enviar telemetría a Microsoft

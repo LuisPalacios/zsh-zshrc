@@ -40,6 +40,137 @@ if [[ $(printenv | grep -c "VSCODE_") -gt 0 ]]; then
 fi
 
 # -----------------------------------------------------------------------------
+# Comunes
+# -----------------------------------------------------------------------------
+#
+
+# Parametrización de Zsh común
+#
+parametriza_zsh_comun() {
+  # No poner líneas de comando en la lista de historial si son duplicados
+  setopt HIST_IGNORE_DUPS
+  # Comparte el historial entre todas las instancias
+  setopt SHARE_HISTORY
+  # Que no pida Y/N cuando se hace un rm -fr
+  setopt RM_STAR_SILENT
+  # Habilitar expansión de parñametros en el prompt, necesario para
+  # mostrar información de branches de Git por ejemplo.
+  setopt PROMPT_SUBST
+
+  # Uso los keybindings emacs incluso si el editor está puesto a 'vi'
+  bindkey -e
+
+  # Mantener 1000 líneas de history
+  HISTSIZE=1000
+  SAVEHIST=1000
+  HISTFILE=~/.zsh_history
+
+  # Usar el sistema de auto completado moderno
+  autoload -Uz compinit
+  compinit
+  zstyle ':completion:*' auto-description 'specify: %d'
+  zstyle ':completion:*' completer _expand _complete _correct _approximate
+  zstyle ':completion:*' format 'Completing %d'
+  zstyle ':completion:*' group-name ''
+  zstyle ':completion:*' menu select=2
+  zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+  zstyle ':completion:*' list-colors ''
+  zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+  zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+  zstyle ':completion:*' menu select=long
+  zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+  zstyle ':completion:*' use-compctl false
+  zstyle ':completion:*' verbose true
+  zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+  zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+  zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
+
+  # Permitir ganchos en diferentes puntos de la ejecución del shell,
+  # como antes o después de un comando, permitiendo a los usuarios o scripts
+  # añadir comportamientos personalizados en estos puntos.
+  autoload -Uz add-zsh-hook
+
+}
+
+
+# Ejecutar Oh My Posh
+#
+ejecuta_oh_my_posh() {
+
+  # Instalación de Oh My Posh
+  #
+  # MacOS, Windows y Linux:
+  #   Fuente: https://ohmyposh.dev/docs/installation/linux
+  #
+  # WSL2:
+  #   sudo su -
+  #   apt update && apt upgrade -y && apt full-upgrade -y
+  #   apt install unzip
+  #   mkdir ~/bin
+  #   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
+  #     Instala temas en /home/luis/.cache/oh-my-posh/themes
+  #   Revisar el PATH (en mi caso ya tengo /home/luis/bin en este .zshrc)
+  #   Salgo y entro de nuevo a WSL2
+  #
+  #   Instalo la fuente de Meslo:
+  #     oh-my-posh font install
+  #
+  #   La primera vez arranca con el tema por defecto, lo renombro
+  #    oh-my-posh config export --output ~/.luispa.omp.json
+  #    Solo le quité el naranja del directorio al de por defecto
+  #    el de por defecto es jandedobbeleer.omp.json
+  #
+
+  # Primero comprobar si está Oh-My-Posh instalado
+  if ! command -v oh-my-posh >/dev/null 2>&1; then
+    echo "Necesitas instalar 'Oh My Posh', más info en .zshrc"
+  else
+
+    # Compruebo si tengo mi tema
+    LOCAL_FILE=~/.luispa.omp.json
+    REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.luispa.omp.json"
+    TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
+
+    # Detectar el sistema operativo para usar el comando 'date' correcto
+    case "$OSTYPE" in
+      # MacOS
+      (darwin|freebsd)*)
+        ONE_DAY_AGO=$(date -v -1d +%s)
+        ;;
+      # Linux|WSL2
+      *)
+        ONE_DAY_AGO=$(date -d '1 day ago' +%s)
+        ;;
+    esac
+
+    # Comprobar si el archivo local no existe
+    if [[ ! -a $LOCAL_FILE ]]; then
+      curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
+      touch $LOCAL_FILE
+    else
+      # Verificar si se ha descargado en el último día
+      if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
+        # Descargar el archivo remoto temporalmente
+        curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
+        # Comprobar si el archivo local es diferente del remoto
+        if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
+          # El fichero local es diferente del remoto, actualizo copiando el remoto al local
+          mv $TEMP_REMOTE_FILE $LOCAL_FILE
+        else
+          rm $TEMP_REMOTE_FILE
+        fi
+        touch $LOCAL_FILE
+      fi
+    fi
+
+    # Arranco Oh My Posh
+    eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
+  fi
+
+}
+
+
+# -----------------------------------------------------------------------------
 # WSL2
 # -----------------------------------------------------------------------------
 #
@@ -96,44 +227,27 @@ if [ "$IS_WSL2" = true ] ; then
 
   # Alias
   alias c="cd /mnt/c/Users/luis"
-  alias sw="cd /mnt/c/Users/luis/00.git/03.github-sumwall/sumwall.browser"
   alias git="git.exe"
 
-  # Cómo instalar OhMyPosh en WSL2
-  #   Fuente: https://ohmyposh.dev/docs/installation/linux
+  # Comunes
   #
-  #   sudo apt install unzip
-  #   mkdir ~/bin
-  #   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
-  #   PATH=$PATH:/home/luis/bin (ya lo tenía)
-  #
-  #   Instalo temas en /home/luis/.cache/oh-my-posh/themes
-  #   Instalo una fuente:
-  #   oh-my-posh font install
-  #     Successfully installed Meslo
-  #
-  # La primera vez arranco sin tema, lo salvo y lo edito
-  # oh-my-posh config export --output ~/.luispa.omp.json
-  #  Solo le quité el naranja del directorio al de por defecto
-  #  El de por defecto es jandedobbeleer.omp.json
-  #
-  if ! command -v oh-my-posh >/dev/null 2>&1; then
-    echo "Necesitas instalar 'Oh My Posh', más info en .zshrc"
-  else
-    eval "$(oh-my-posh init zsh --config ~/.luispa.omp.json)"
-  fi
+  parametriza_zsh_comun
 
-# -----------------------------------------------------------------------------
+  # Arrancar Oh My Posh
+  # Esto es lo último que se debe hacer
+  ejecuta_oh_my_posh
+
+# --------------------------------------------------------------------------------
 # Resto: MacOS, Linux
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 else
 
-  # PATH ------------------------------------------------------------------------
+  # PATH MacOS Y Linux -----------------------------------------------------------
   #
   case "$OSTYPE" in
-    # PATH MacOS------------------------------------------------------------------
-    #
+
     (darwin|freebsd)*)
+       # PATH MacOS---------------------------------------------------------------
       export PATH=.:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$HOME/dev-tools/kombine.osx:$PATH
       launchctl setenv PATH ".:$HOME/Nextcloud/priv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH"
       # Homebrew
@@ -153,7 +267,7 @@ else
       export SHFMT_PATH="/opt/homebrew/bin/shfmt"
       ;;
     *)
-      # PATH Linux------------------------------------------------------------------
+      # PATH Linux---------------------------------------------------------------
       #
       if [[ $EUID -eq 0 ]]; then
         # En el caso de ser root no hago nada
@@ -170,55 +284,8 @@ else
   export GEM_HOME=~/.gems
   export PATH=~/.gems/bin:$PATH
 
-
-  # PARAMETRIZACION MacOS Y Linux --------------------------------------------------
+  # PARAMETRIZACION MacOS Y Linux -----------------------------------------------
   #
-
-  # OH MY POSH ---------------------------------------------------------------------
-  #
-  # Compruebo si tengo Oh My Posh instalado y me bajo mi tema.
-  # TODO: Probar con WSL2 a ver si es posible hacer lo mismo.
-  if which oh-my-posh >/dev/null 2>&1; then
-  echo tengo
-    LOCAL_FILE=~/.luispa.omp.json
-    REMOTE_FILE_URL="https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.luispa.omp.json"
-    TEMP_REMOTE_FILE="/tmp/.luispa.omp_remote.json"
-
-    # Detectar el sistema operativo para usar el comando 'date' correcto
-    case "$OSTYPE" in
-      # MacOS
-      (darwin|freebsd)*)
-        ONE_DAY_AGO=$(date -v -1d +%s)
-        ;;
-      # Linux|WSL2
-      *)
-        ONE_DAY_AGO=$(date -d '1 day ago' +%s)
-        ;;
-    esac
-
-    # Comprobar si el archivo local no existe
-    if [[ ! -a $LOCAL_FILE ]]; then
-      curl --connect-timeout 2 --max-time 3 -LJs -o $LOCAL_FILE $REMOTE_FILE_URL
-      touch $LOCAL_FILE
-    else
-      # Verificar si se ha descargado en el último día
-      if [[ $(stat -c %Y $LOCAL_FILE 2>/dev/null || stat -f %m $LOCAL_FILE) -le $ONE_DAY_AGO ]]; then
-        # Descargar el archivo remoto temporalmente
-        curl --connect-timeout 2 --max-time 3 -LJs -o $TEMP_REMOTE_FILE $REMOTE_FILE_URL
-        # Comprobar si el archivo local es diferente del remoto
-        if ! cmp -s $LOCAL_FILE $TEMP_REMOTE_FILE; then
-          # El fichero local es diferente del remoto, actualizo copiando el remoto al local
-          mv $TEMP_REMOTE_FILE $LOCAL_FILE
-        else
-          rm $TEMP_REMOTE_FILE
-        fi
-        touch $LOCAL_FILE
-      fi
-    fi
-  fi
-
-AQUI LUISPA
-
   # Variables de entorno para no enviar telemetría a Microsoft
   export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
@@ -240,8 +307,11 @@ AQUI LUISPA
     curl -LJs -o ~/.zshrc.async https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async
   fi
 
-  # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
+  # TMUX MacOS Y Linux ----------------------------------------------------------
   #
+  # Este código está comentado porque no lo uso.
+  #
+  # Ejecución de `tmux` (si está disponible y además existe ~/.tmux.conf)
   # Esto podría haberlo configurado de dos formas. Cuando hago login con mi
   # usuario y arranza zsh. He optado por la opcion (2)
   #
@@ -348,15 +418,15 @@ AQUI LUISPA
   # mostrar información de branches de Git por ejemplo.
   setopt PROMPT_SUBST
 
-  # Use emacs keybindings even if our EDITOR is set to vi
+  # Uso los keybindings emacs incluso si el editor está puesto a 'vi'
   bindkey -e
 
-  # Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+  # Mantener 1000 líneas de history
   HISTSIZE=1000
   SAVEHIST=1000
   HISTFILE=~/.zsh_history
 
-  # Use modern completion system
+  # Usar el sistema de auto completado moderno
   autoload -Uz compinit
   compinit
   zstyle ':completion:*' auto-description 'specify: %d'
