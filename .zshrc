@@ -1,6 +1,6 @@
 # Fichero .zshrc de LuisPa
-# Versión: 11 Mayo 2025
-# Utilizado en MacOS (con brew), Linux (Ubuntu), Windows WSL2
+# Versión: 19 Mayo 2025
+# Utilizado en MacOS (brew), Linux (Ubuntu), Windows WSL2
 #
 # Referencias:
 #
@@ -28,6 +28,10 @@
 # Debug: En caso de necesitarlo, activar la línea siguiente
 #set -x
 
+# Parametrización
+MODO="omp"  # "omp" para OhMyPosh o "starship"
+SOY="luis"  # cual es mi nombre de usuario en este sistema
+
 # Detecciones:
 # Estoy dentro de una sesión WSL2?
 export IS_WSL2=false
@@ -45,9 +49,17 @@ fi
 # -----------------------------------------------------------------------------
 #
 
+
+# Función para averiguar la opción de usar colores en el comando ls
+function test-ls-args {
+  local cmd="$1"          # ls, gls, colorls, ...
+  local args="${@[2,-1]}" # los argumentos excepto el primero
+  command "$cmd" "$args" /dev/null &>/dev/null
+}
+
 # Parametrización de Zsh común
 #
-parametriza_zsh_comun() {
+function parametriza_zsh_comun() {
 
   # Personalización de los colores del comando 'ls'
   # LS_COLORS se usan en ls de GNU,
@@ -159,7 +171,7 @@ parametriza_zsh_comun() {
 
 # Ejecutar Oh My Posh
 #
-ejecuta_oh_my_posh() {
+function ejecuta_oh_my_posh() {
 
   # Instalación de Oh My Posh
   #
@@ -172,8 +184,8 @@ ejecuta_oh_my_posh() {
   #   apt install unzip
   #   mkdir ~/bin
   #   curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/bin
-  #     Instala temas en /home/luis/.cache/oh-my-posh/themes
-  #   Revisar el PATH (en mi caso ya tengo /home/luis/bin en este .zshrc)
+  #     Instala temas en /home/${SOY}/.cache/oh-my-posh/themes
+  #   Revisar el PATH (en mi caso ya tengo /home/${SOY}/bin en este .zshrc)
   #   Salgo y entro de nuevo a WSL2
   #
   #   Instalo la fuente de Meslo:
@@ -242,7 +254,7 @@ ejecuta_oh_my_posh() {
 
 # Ejecutar (linux/mac) git async y starship
 #
-ejecuta_async_y_starship() {
+function ejecuta_async_y_starship() {
 
   # IMPORTANTE:
   # Descargo una librería de apoyo para ejecutar ciertas partes de estes cript en modo asíncrono
@@ -543,88 +555,9 @@ ejecuta_async_y_starship() {
     wsl2_parse_git_branch_cached
   }
 
-  # Función para averiguar la opción de usar colores en el comando ls
-  function test-ls-args {
-    local cmd="$1"          # ls, gls, colorls, ...
-    local args="${@[2,-1]}" # los argumentos excepto el primero
-    command "$cmd" "$args" /dev/null &>/dev/null
-  }
-
-  # Parametrizaciones según el OS
-  case "$OSTYPE" in
-
-    # NetBSD
-    netbsd*)
-      # On NetBSD, test if `gls` (GNU ls) is installed (this one supports colors);
-      # otherwise, leave ls as is, because NetBSD's ls doesn't support -G
-      test-ls-args gls --color && alias ls='gls --color=tty'
-      ;;
-
-    # OpenBSD
-    openbsd*)
-      # On OpenBSD, `gls` (ls from GNU coreutils) and `colorls` (ls from base,
-      # with color and multibyte support) are available from ports.
-      # `colorls` will be installed on purpose and can't be pulled in by installing
-      # coreutils (which might be installed for ), so prefer it to `gls`.
-      test-ls-args gls --color && alias ls='gls --color=tty'
-      test-ls-args colorls -G && alias ls='colorls -G'
-      ;;
-
-    # MacOS
-    (darwin|freebsd)*)
-      # This alias works by default just using $LSCOLORS
-      test-ls-args ls -G && alias ls='ls -G'
-      # Only use GNU ls if installed and there are user defaults for $LS_COLORS,
-      # as the default coloring scheme is not very pretty
-      zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
-        && test-ls-args gls --color \
-        && alias ls='gls --color=tty'
-
-      # Deshabilito FLOW CONTROL en mi terminal para que CTRL-S, CTRL-Q funcionen normales
-      stty -ixon
-
-      # Mi PROMPT
-      PROMPT='🍏 %F{green}%B%n%b@%F{yellow}%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
-
-      # ALIAS
-      alias grep="/usr/bin/grep -d skip"
-      alias e="/usr/local/bin/code"
-      #alias python="/opt/homebrew/bin/python3"
-      alias pip="/opt/homebrew/bin/pip3"
-
-      # Acelerar la navegación en recursos compartidos de red
-      (defaults write com.apple.desktopservices DSDontWriteNetworkStores true &)
-
-      # SSH - Lo arranco en el background porque tarda 1 o 2 segundos
-      # De esta forma consigo el prompt inmediatamente.
-      (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
-
-      ;;
-    # Linux
-    *)
-      if test-ls-args ls --color; then
-        alias ls='ls --color=tty'
-      elif test-ls-args ls -G; then
-        alias ls='ls -G'
-      fi
-      #alias python="/usr/bin/python3"
-
-      # Mi PROMPT para root
-      if [[ $EUID -eq 0 ]]; then
-        # En el caso de ser root
-        PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
-      else
-        # Mi usuario normal con Git info en el prompt muy detallado
-        PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
-
-        # Me aseguro de que el agente SSH esté en ejecución
-        eval "$(ssh-agent)" &>/dev/null
-      fi
-
-      ;;
-  esac
-
-
+  # ==============================================================================
+  # Starship
+  # ==============================================================================
   if which starship >/dev/null 2>&1; then
     #echo "El ejecutable existe"
     # Variables
@@ -691,13 +624,13 @@ if [ "$IS_WSL2" = true ] ; then
 
   # PATH WSL2------------------------------------------------------------------
   #
-  export PATH=".:/mnt/c/Users/luis/Nextcloud/priv/bin:/mnt/c/Users/luis/Nextcloud/priv/bin/win"
-  export PATH=$PATH:"/home/luis/bin:/mnt/c/Users/luis/dev-tools/kombine.win"
+  export PATH=".:/mnt/c/Users/${SOY}/Nextcloud/priv/bin:/mnt/c/Users/${SOY}/Nextcloud/priv/bin/win"
+  export PATH=$PATH:"/home/${SOY}/bin:/mnt/c/Users/${SOY}/dev-tools/kombine.win"
   export PATH=$PATH:"/mnt/c/Program Files/Docker/Docker/resources/bin"
   export PATH=$PATH:"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib"
   export PATH=$PATH:"/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/wbem"
   export PATH=$PATH:"/mnt/c/Windows/System32/WindowsPowerShell/v1.0:/mnt/c/Program Files/PowerShell/7"
-  export PATH=$PATH:"/mnt/c/Users/luis/AppData/Local/Programs/Microsoft VS Code/bin"
+  export PATH=$PATH:"/mnt/c/Users/${SOY}/AppData/Local/Programs/Microsoft VS Code/bin"
   export PATH=$PATH:"/mnt/c/Program Files/Git/mingw64/bin"
   export PATH=$PATH:"/usr/local/go/bin"
 
@@ -706,7 +639,7 @@ if [ "$IS_WSL2" = true ] ; then
   parametriza_zsh_comun
 
   # Alias
-  alias c="cd /mnt/c/Users/luis"
+  alias c="cd /mnt/c/Users/${SOY}"
   alias git="git.exe"
 
   # Arrancar en modo Oh My Posh
@@ -722,6 +655,22 @@ else
   # PATH MacOS Y Linux -----------------------------------------------------------
   #
   case "$OSTYPE" in
+    # NetBSD
+    netbsd*)
+      # On NetBSD, test if `gls` (GNU ls) is installed (this one supports colors);
+      # otherwise, leave ls as is, because NetBSD's ls doesn't support -G
+      test-ls-args gls --color && alias ls='gls --color=tty'
+      ;;
+
+    # OpenBSD
+    openbsd*)
+      # On OpenBSD, `gls` (ls from GNU coreutils) and `colorls` (ls from base,
+      # with color and multibyte support) are available from ports.
+      # `colorls` will be installed on purpose and can't be pulled in by installing
+      # coreutils (which might be installed for ), so prefer it to `gls`.
+      test-ls-args gls --color && alias ls='gls --color=tty'
+      test-ls-args colorls -G && alias ls='colorls -G'
+      ;;
 
     (darwin|freebsd)*)
        # PATH MacOS---------------------------------------------------------------
@@ -743,6 +692,34 @@ else
       export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
       # Path para shfmt
       export SHFMT_PATH="/opt/homebrew/bin/shfmt"
+
+      # Prepara la gestión de los colores para ls
+      test-ls-args ls -G && alias ls='ls -G'
+      zstyle -t ':omz:lib:theme-and-appearance' gnu-ls \
+        && test-ls-args gls --color \
+        && alias ls='gls --color=tty'
+
+      # Deshabilito FLOW CONTROL en mi terminal para que CTRL-S, CTRL-Q funcionen normales
+      stty -ixon
+
+      # Mi PROMPT solo en modo "startship"
+      if [[ "${MODO}" == "starship" ]]; then
+        PROMPT='🍏 %F{green}%B%n%b@%F{yellow}%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
+      fi
+
+      # ALIAS
+      alias grep="/usr/bin/grep -d skip"
+      alias e="/usr/local/bin/code"
+      #alias python="/opt/homebrew/bin/python3"
+      alias pip="/opt/homebrew/bin/pip3"
+
+      # Acelerar la navegación en recursos compartidos de red
+      (defaults write com.apple.desktopservices DSDontWriteNetworkStores true &)
+
+      # SSH - Lo arranco en el background porque tarda 1 o 2 segundos
+      # De esta forma consigo el prompt inmediatamente.
+      (ssh-add --apple-load-keychain >/dev/null 2>&1 &)
+
       ;;
     *)
       # PATH Linux---------------------------------------------------------------
@@ -754,6 +731,28 @@ else
         # Para un usuario normal
         export PATH=.:$HOME/Nextcloud/priv/bin:$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$PATH
         export SHFMT_PATH="/usr/bin/shfmt"
+      fi
+
+      # Prepara la gestión de los colores para ls
+      if test-ls-args ls --color; then
+        alias ls='ls --color=tty'
+      elif test-ls-args ls -G; then
+        alias ls='ls -G'
+      fi
+      #alias python="/usr/bin/python3"
+
+      # Mi PROMPT para root
+      if [[ $EUID -eq 0 ]]; then
+        # En el caso de ser root
+        PROMPT='[%B%F{white}root%f%b]@%m:%~%# '
+      else
+        # Mi PROMPT solo en modo "startship"
+        if [[ "${MODO}" == "starship" ]]; then
+          PROMPT='⚡ %F{green}%B%n%b@%m%f:%B%F{cyan}%1~%f%b${vcs_info_msg_0_}$(__git_info) %# '
+        fi
+
+        # Me aseguro de que el agente SSH esté en ejecución
+        eval "$(ssh-agent)" &>/dev/null
       fi
       ;;
   esac
