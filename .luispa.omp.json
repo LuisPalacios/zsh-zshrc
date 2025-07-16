@@ -37,6 +37,18 @@
       "alignment": "left",
       "segments": [
         {
+          "type": "os",
+          "style": "plain",
+          "foreground": "#26C6DA",
+          //"background": "#546E7A",
+          "template": "[{{.Icon}}] ",
+          "properties": {
+            "macos": "🍎",
+            "windows": "🪟",
+            "linux": "🐧"
+          }
+        },
+        {
           "type": "session",
           "style": "plain",
           "template": "<p:white><b>{{ if .SSHSession }}\ueba9 {{ end }}{{ .UserName }}</b><p:whitesoft>@{{ .HostName }}:"
