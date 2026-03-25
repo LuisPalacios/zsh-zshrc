@@ -7,3 +7,5 @@ En este repo tengo los siguientes archivos:
 - [~/.zshrc](https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc): Fichero principal de configuración
 - [~/.oh-my-posh.yaml](https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.oh-my-posh.yaml): Fichero THEME para Oh My Posh (leer el .zshrc)
 - [~/.zshrc.async](https://raw.githubusercontent.com/LuisPalacios/zsh-zshrc/main/.zshrc.async): Fichero de apoyo para configuraciones asíncronas principalmente para git.
+
+--
